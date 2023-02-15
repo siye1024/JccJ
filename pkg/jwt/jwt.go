@@ -13,8 +13,8 @@ type JWT struct {
 // private claims, share information between parties that agree on using them
 // CustomClaims Structured version of Claims Section, as referenced at https://tools.ietf.org/html/rfc7519#section-4.1 See examples for how to use this with your own claim types
 type CustomClaims struct {
-	Id          int64
-	AuthorityId int64
+	Id   int64
+	Time int64
 	jwt.StandardClaims
 }
 

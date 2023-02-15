@@ -1,8 +1,13 @@
 package xhttp
 
 import (
+	"dousheng/pkg/jwt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+)
+
+var (
+	Jwt = jwt.NewJWT([]byte("SoundDance"))
 )
 
 func SendResponse(c *gin.Context, response interface{}) {

@@ -2,7 +2,9 @@ package usersrv
 
 import (
 	"context"
+	"dousheng/controller/xhttp"
 	"dousheng/db"
+	"dousheng/pkg/jwt"
 	user "dousheng/rpcserver/user/kitex_gen/user"
 	svr "dousheng/rpcserver/user/kitex_gen/user/usersrv"
 	"fmt"
@@ -14,6 +16,7 @@ import (
 	etcd "github.com/kitex-contrib/registry-etcd"
 	"log"
 	"net"
+	"time"
 )
 
 // UserSrvImpl implements the last service interface defined in the IDL.
@@ -22,7 +25,6 @@ type UserSrvImpl struct{}
 // Register implements the UserSrvImpl interface.
 func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegisterRequest) (resp *user.DouyinUserRegisterResponse, err error) {
 	var (
-		//Jwt           *jwt.JWT
 		respStatusMsg = "User Register Success"
 	)
 	// empty username or password has been processed by dousheng client
@@ -43,22 +45,21 @@ func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegister
 		return nil, err
 	}
 
-	//TODO AUOTO LOGIN
+	//TODO : AUOTO LOGIN
+	//TODO please complete login func and replace code here
 	users, err = db.QueryUser(ctx, req.Username)
 	if err != nil {
 		return nil, err
 	}
 	loginUser := users[0]
 	uid := int64(loginUser.ID)
-	/*
-		token, err := Jwt.CreateToken(jwt.CustomClaims{
-			Id: int64(uid),
-		})
-		if err != nil {
-			return nil, err
-		}
-	*/
-	token := "xzl"
+
+	// Sign Key refers to xttp.common, is SoundDance here
+	token, err := xhttp.Jwt.CreateToken(jwt.CustomClaims{ //Claim is payload
+		Id:   int64(uid),
+		Time: time.Now().Unix(),
+	})
+
 	//Register Success
 	resp = &user.DouyinUserRegisterResponse{
 		StatusCode: 0,
@@ -66,7 +67,7 @@ func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegister
 		UserId:     uid,
 		Token:      token,
 	}
-	log.Println("zhelichucuo l ")
+
 	return resp, nil
 }
 
