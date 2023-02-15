@@ -15,5 +15,5 @@ type Relation struct {
 }
 
 func (Relation) TableName() string {
-	return "relation"
+	return "relations"
 }
