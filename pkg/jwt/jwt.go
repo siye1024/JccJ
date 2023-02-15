@@ -40,13 +40,13 @@ func (j *JWT) ParseToken(tokenString string) (*CustomClaims, error) {
 	if err != nil {
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-				return nil, kerrors.NewBizStatusError(404, "That's not even a token")
+				return nil, kerrors.NewBizStatusError(10003, "JWT ERROR:That's not even a token")
 			} else if ve.Errors&jwt.ValidationErrorExpired != 0 {
-				return nil, kerrors.NewBizStatusError(404, "Token expired")
+				return nil, kerrors.NewBizStatusError(10004, "JWT ERROR:Token expired")
 			} else if ve.Errors&jwt.ValidationErrorNotValidYet != 0 {
-				return nil, kerrors.NewBizStatusError(404, "Token is not active yet")
+				return nil, kerrors.NewBizStatusError(10005, "JWT ERROR:Token is not active yet")
 			} else {
-				return nil, kerrors.NewBizStatusError(404, "Couldn't handle this token")
+				return nil, kerrors.NewBizStatusError(10006, "JWT ERROR:Couldn't handle this token")
 			}
 
 		}
@@ -55,5 +55,5 @@ func (j *JWT) ParseToken(tokenString string) (*CustomClaims, error) {
 	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
 		return claims, nil
 	}
-	return nil, kerrors.NewBizStatusError(404, "Couldn't handle this token")
+	return nil, kerrors.NewBizStatusError(10006, "JWT ERROR:Couldn't handle this token")
 }
