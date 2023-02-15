@@ -27,7 +27,7 @@ func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegister
 	var (
 		respStatusMsg = "User Register Success"
 	)
-	// empty username or password has been processed by dousheng client
+	// empty username or password has been processed by user client
 	users, err := db.QueryUser(ctx, req.Username)
 	if err != nil {
 		return nil, err

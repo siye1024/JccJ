@@ -25,7 +25,7 @@ func Register(c *gin.Context) {
 	)
 	registerMsg.UserName = c.Query("username")
 	registerMsg.PassWord = c.Query("password")
-	// if username == empty or password == empty, Actually this case has been processed by dousheng client
+	// if username == empty or password == empty, Actually this case has been processed by user client
 	if len(registerMsg.UserName) == 0 || len(registerMsg.PassWord) == 0 {
 		SendResponse(c, gin.H{
 			"status_code": 10001,
