@@ -1,0 +1,25 @@
+version: '3.5'
+# 网络配置
+
+#networks:
+#  backend:
+#    driver: bridge
+
+# 服务容器配置
+services:
+  Etcd:
+    image: 'bitnami/etcd:latest'
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+    ports:
+      - 2379:2379
+
+  mysql:
+    image: 'mysql:latest'
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_DATABASE=Doushengdb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pass
+      - MYSQL_RANDOM_ROOT_PASSWORD="yes"
