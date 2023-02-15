@@ -2,8 +2,12 @@
 	resp.StatusCode		resp.StatusMsg
 
 - 	0					success
--	10001					Empty Username or Password
--	10002					User Already Exist
+-	10001				Empty Username or Password
+-	10002				User Already Exist
+-	10003				JWT ERROR:That's not even a token
+-	10004				JWT ERROR:Token expired
+-	10005				JWT ERROR:Token is not active yet
+-	10006				JWT ERROR:Couldn't handle this token
 -	-1					Service Process Error
 */
 package xhttp

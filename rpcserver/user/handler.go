@@ -7,7 +7,6 @@ import (
 	"dousheng/pkg/jwt"
 	user "dousheng/rpcserver/user/kitex_gen/user"
 	svr "dousheng/rpcserver/user/kitex_gen/user/usersrv"
-	"fmt"
 	"github.com/cloudwego/kitex/pkg/kerrors"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -111,5 +110,5 @@ func (s *UserSrvImpl) Start() {
 
 }
 func (s *UserSrvImpl) Stop() {
-	fmt.Println("Stop User RPC service...")
+	log.Println("Stop User RPC service...")
 }
