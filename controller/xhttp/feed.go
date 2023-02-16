@@ -2,8 +2,6 @@
 	resp.StatusCode		resp.StatusMsg
 
 - 	0					success
--	20001				Convert Error
--	20002				Videos Pack Error
 -	-1					Service Process Error
 */
 
@@ -12,8 +10,8 @@ package xhttp
 import (
 	"dousheng/controller/xrpc"
 	"dousheng/rpcserver/feed/kitex_gen/feed"
-	"github.com/cloudwego/kitex/pkg/kerrors"
 	"github.com/gin-gonic/gin"
+	"log"
 	"strconv"
 	"time"
 )
@@ -23,14 +21,15 @@ func Feed(c *gin.Context) {
 	var (
 		feedVar        FeedParam
 		latestTime     int64
-		token          string = "dsdasd"
-		respStatusCode        = 20001
-		respStatusMsg         = "Convert Error"
+		token          string = "xzl"
+		respStatusCode        = -1
+		respStatusMsg         = "Feed Get Error"
 	)
 	//check latest time here because we need to do Atoi
 	lastst_time := c.Query("latest_time")
 	if len(lastst_time) != 0 {
 		if parsetime, err := strconv.Atoi(lastst_time); err != nil {
+			log.Print(err)
 			SendResponse(c, gin.H{"status_code": respStatusCode, "status_msg": respStatusMsg})
 			return
 		} else { // valid latest time
@@ -49,9 +48,7 @@ func Feed(c *gin.Context) {
 		LatestTime: feedVar.LatestTime,
 		Token:      feedVar.Token,
 	})
-	_, isBizErr := kerrors.FromBizStatusError(err)
-	if isBizErr == true || err != nil {
-
+	if err != nil {
 		SendResponse(c, gin.H{"status_code": respStatusCode, "status_msg": respStatusMsg})
 		return
 	}

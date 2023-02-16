@@ -7,7 +7,6 @@ import (
 	"dousheng/pkg/pack"
 	feed "dousheng/rpcserver/feed/kitex_gen/feed"
 	feedsrv "dousheng/rpcserver/feed/kitex_gen/feed/feedsrv"
-	"github.com/cloudwego/kitex/pkg/kerrors"
 	"time"
 
 	"github.com/cloudwego/kitex/pkg/limit"
@@ -56,7 +55,8 @@ func (s *FeedSrvImpl) GetUserFeed(ctx context.Context, req *feed.DouyinFeedReque
 
 	vis, err := pack.PackVideos(ctx, videos, &uid)
 	if err != nil {
-		return nil, kerrors.NewBizStatusError(20002, "Videos Pack Error")
+		log.Println(err)
+		return nil, err
 	}
 
 	resp = &feed.DouyinFeedResponse{
