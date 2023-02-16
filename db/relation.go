@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"gorm.io/gorm"
 )
 
@@ -16,4 +17,13 @@ type Relation struct {
 
 func (Relation) TableName() string {
 	return "relations"
+}
+
+func GetRelation(ctx context.Context, uid int64, tid int64) (*Relation, error) {
+	relation := new(Relation)
+
+	if err := DB.WithContext(ctx).First(&relation, "user_id = ? and to_user_id = ?", uid, tid).Error; err != nil {
+		return nil, err
+	}
+	return relation, nil
 }
