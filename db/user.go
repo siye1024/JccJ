@@ -33,3 +33,13 @@ func QueryUser(ctx context.Context, userName string) ([]*User, error) {
 	}
 	return res, nil
 }
+
+// GetUserByID
+func GetUserByID(ctx context.Context, userID int64) (*User, error) {
+	res := new(User)
+
+	if err := DB.WithContext(ctx).First(&res, userID).Error; err != nil {
+		return nil, err
+	}
+	return res, nil
+}

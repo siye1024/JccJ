@@ -1,3 +1,12 @@
+/*
+	resp.StatusCode		resp.StatusMsg
+
+- 	0					success
+-	20001				Convert Error
+-	20002				Videos Pack Error
+-	-1					Service Process Error
+*/
+
 package xhttp
 
 import (
@@ -13,11 +22,12 @@ import (
 func Feed(c *gin.Context) {
 	var (
 		feedVar        FeedParam
-		latestTime     int64  = 154545
+		latestTime     int64
 		token          string = "dsdasd"
 		respStatusCode        = 20001
 		respStatusMsg         = "Convert Error"
 	)
+	//check latest time here because we need to do Atoi
 	lastst_time := c.Query("latest_time")
 	if len(lastst_time) != 0 {
 		if parsetime, err := strconv.Atoi(lastst_time); err != nil {
@@ -26,8 +36,8 @@ func Feed(c *gin.Context) {
 		} else { // valid latest time
 			latestTime = int64(parsetime)
 		}
-	} else { // empty, choose current time
-		latestTime = time.Now().Unix()
+	} else { // empty latest time, choose current time
+		latestTime = time.Now().UnixMilli()
 	}
 
 	feedVar.LatestTime = &latestTime
