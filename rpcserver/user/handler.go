@@ -72,14 +72,104 @@ func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegister
 
 // Login implements the UserSrvImpl interface.
 func (s *UserSrvImpl) Login(ctx context.Context, req *user.DouyinUserRegisterRequest) (resp *user.DouyinUserRegisterResponse, err error) {
-	// TODO: Your code here...
-	return
+	var (
+		//Jwt           *jwt.JWT
+		respStatusMsg = "User Login Success"
+	)
+	// empty username or password has been processed by dousheng client
+	users, err := db.QueryUser(ctx, req.Username)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) == 0 {
+		err := kerrors.NewBizStatusError(10007, "Invalid Username")
+		return nil, err
+	}
+	userLogin := users[0]
+	if req.Password != userLogin.Password {
+		err := kerrors.NewBizStatusError(100008, "Invalid Password")
+		return nil, err
+	}
+	uid := int64(userLogin.ID)
+	token, err := xhttp.Jwt.CreateToken(jwt.CustomClaims{ //Claim is payload
+		Id:   int64(uid),
+		Time: time.Now().Unix(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	resp = &user.DouyinUserRegisterResponse{
+		StatusCode: 0,
+		StatusMsg:  &respStatusMsg,
+		UserId:     uid,
+		Token:      token, // successful resp must have token
+	}
+
+	return resp, nil
 }
 
 // GetUserById implements the UserSrvImpl interface.
 func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserRequest) (resp *user.DouyinUserResponse, err error) {
-	// TODO: Your code here...
-	return
+	var (
+		//Jwt           *jwt.JWT
+		respStatusMsg = "Get User's Info By ID Successfully"
+	)
+
+	claim, err := xhttp.Jwt.ParseToken(req.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.UserId < 0 {
+		return nil, err
+	}
+
+	u := new(user.User)
+	if err := db.DB.WithContext(ctx).First(&u, req.UserId).Error; err != nil {
+		return nil, err
+	}
+
+	if u == nil {
+		err := kerrors.NewBizStatusError(10009, "User Already Withdraw")
+		return nil, err
+	}
+
+	follow_count := int64(*u.FollowCount)
+	follower_count := int64(*u.FollowerCount)
+
+	// true means the claim.id has follow the modelUser.id, false means not follow
+
+	isFollow := false
+	/*
+		relation := new(db.Relation)
+		if err := db.DB.WithContext(ctx).First(&relation, "user_id = ? and to_user_id = ?", claim.Id, int64(u.Id)).Error; err != nil {
+			return nil, err
+		}
+
+		if relation != nil {
+			isFollow = true
+		}
+	*/
+	userInfo := &user.User{
+		Id:            int64(u.Id),
+		Name:          u.Name,
+		FollowCount:   &follow_count,
+		FollowerCount: &follower_count,
+		IsFollow:      isFollow,
+	}
+
+	if claim.Id == req.UserId {
+		userInfo.IsFollow = true
+	} else {
+		userInfo.IsFollow = false
+	}
+
+	resp = &user.DouyinUserResponse{
+		StatusCode: 0,
+		StatusMsg:  &respStatusMsg,
+		User:       userInfo,
+	}
+	return resp, nil
 }
 
 func (s *UserSrvImpl) Start() {
