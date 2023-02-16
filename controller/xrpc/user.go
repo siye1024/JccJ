@@ -51,3 +51,19 @@ func Register(ctx context.Context, req *user.DouyinUserRegisterRequest) (resp *u
 	}
 	return resp, nil
 }
+
+func Login(ctx context.Context, req *user.DouyinUserRegisterRequest) (resp *user.DouyinUserRegisterResponse, err error) {
+	resp, err = userClient.Login(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func GetUserById(ctx context.Context, req *user.DouyinUserRequest) (resp *user.DouyinUserResponse, err error) {
+	resp, err = userClient.GetUserById(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
