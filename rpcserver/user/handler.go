@@ -6,6 +6,7 @@ import (
 	"dousheng/db"
 	"dousheng/pkg/jwt"
 	user "dousheng/rpcserver/user/kitex_gen/user"
+	"dousheng/rpcserver/user/kitex_gen/user/api"
 	svr "dousheng/rpcserver/user/kitex_gen/user/usersrv"
 	"github.com/cloudwego/kitex/pkg/kerrors"
 	"github.com/cloudwego/kitex/pkg/limit"
@@ -18,6 +19,17 @@ import (
 	"time"
 )
 
+// Arg2Config Directly set the parameters
+var (
+	Arg2Config = &api.Argon2Params{
+		Memory:      65536,
+		Iterations:  3,
+		Parallelism: 1,
+		SaltLength:  16,
+		KeyLength:   32,
+	}
+)
+
 // UserSrvImpl implements the last service interface defined in the IDL.
 type UserSrvImpl struct{}
 
@@ -25,46 +37,53 @@ type UserSrvImpl struct{}
 func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegisterRequest) (resp *user.DouyinUserRegisterResponse, err error) {
 	var (
 		respStatusMsg = "User Register Success"
+		respErrorMag  = "Signature is Invalid"
 	)
+
 	// empty username or password has been processed by user client
-	users, err := db.QueryUser(ctx, req.Username)
-	if err != nil {
+	if len(req.Username) == 0 || len(req.Password) == 0 {
+		err := kerrors.NewBizStatusError(10001, "Empty Username or Password")
 		return nil, err
 	}
-	if len(users) != 0 {
-		err := kerrors.NewBizStatusError(10002, "User Already Exist")
-		return nil, err
-	}
-
-	err = db.CreateUser(ctx, []*db.User{{
-		UserName: req.Username,
-		Password: req.Password,
-	}})
-	if err != nil {
+	// len of username or password exceed the 32 bit
+	if len(req.Username) > 32 || len(req.Password) > 32 {
+		err := kerrors.NewBizStatusError(10014, "Too Long Username or Password")
 		return nil, err
 	}
 
-	//TODO : AUOTO LOGIN
-	//TODO please complete login func and replace code here
-	users, err = db.QueryUser(ctx, req.Username)
+	err = api.NewCreateUserOp(ctx).CreateUser(req, Arg2Config)
 	if err != nil {
+		err := kerrors.NewBizStatusError(10013, "Register Failed")
 		return nil, err
 	}
-	loginUser := users[0]
-	uid := int64(loginUser.ID)
 
-	// Sign Key refers to xttp.common, is SoundDance here
+	//Auto Login
+	uid, err := api.NewCheckUserOp(ctx).CheckUser(req)
+	if err != nil {
+		resp = &user.DouyinUserRegisterResponse{
+			StatusCode: 10012,
+			StatusMsg:  &respErrorMag,
+		}
+		return resp, nil
+	}
+
 	token, err := xhttp.Jwt.CreateToken(jwt.CustomClaims{ //Claim is payload
 		Id:   int64(uid),
 		Time: time.Now().Unix(),
 	})
+	if err != nil {
+		resp = &user.DouyinUserRegisterResponse{
+			StatusCode: 10012,
+			StatusMsg:  &respErrorMag,
+		}
+		return resp, nil
+	}
 
-	//Register Success
 	resp = &user.DouyinUserRegisterResponse{
 		StatusCode: 0,
 		StatusMsg:  &respStatusMsg,
 		UserId:     uid,
-		Token:      token,
+		Token:      token, // successful resp must have token
 	}
 
 	return resp, nil
@@ -75,29 +94,41 @@ func (s *UserSrvImpl) Login(ctx context.Context, req *user.DouyinUserRegisterReq
 	var (
 		//Jwt           *jwt.JWT
 		respStatusMsg = "User Login Success"
+		respErrorMag  = "Signature is Invalid"
 	)
 	// empty username or password has been processed by dousheng client
-	users, err := db.QueryUser(ctx, req.Username)
+	if len(req.Username) == 0 || len(req.Password) == 0 {
+		err := kerrors.NewBizStatusError(10001, "Empty Username or Password")
+		return nil, err
+	}
+	// len of username or password exceed 32 bit
+	if len(req.Username) > 32 || len(req.Password) > 32 {
+		err := kerrors.NewBizStatusError(10014, "Too Long Username or Password")
+		return nil, err
+	}
+
+	// check the user's information
+	uid, err := api.NewCheckUserOp(ctx).CheckUser(req)
 	if err != nil {
-		return nil, err
+		resp = &user.DouyinUserRegisterResponse{
+			StatusCode: 10012,
+			StatusMsg:  &respErrorMag,
+		}
+		return resp, nil
 	}
-	if len(users) == 0 {
-		err := kerrors.NewBizStatusError(10007, "Invalid Username")
-		return nil, err
-	}
-	userLogin := users[0]
-	if req.Password != userLogin.Password {
-		err := kerrors.NewBizStatusError(100008, "Invalid Password")
-		return nil, err
-	}
-	uid := int64(userLogin.ID)
+
 	token, err := xhttp.Jwt.CreateToken(jwt.CustomClaims{ //Claim is payload
 		Id:   int64(uid),
 		Time: time.Now().Unix(),
 	})
 	if err != nil {
-		return nil, err
+		resp = &user.DouyinUserRegisterResponse{
+			StatusCode: 10012,
+			StatusMsg:  &respErrorMag,
+		}
+		return resp, nil
 	}
+
 	resp = &user.DouyinUserRegisterResponse{
 		StatusCode: 0,
 		StatusMsg:  &respStatusMsg,
