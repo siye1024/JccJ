@@ -5,4 +5,6 @@ func InitRpcClient() {
 
 	initFeedRpc()
 
+	initCommentRpc()
+
 }

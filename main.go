@@ -3,6 +3,7 @@ package main
 import (
 	"dousheng/controller/xrpc"
 	"dousheng/db"
+	commentsrv "dousheng/rpcserver/comment"
 	feedsrv "dousheng/rpcserver/feed"
 	usersrv "dousheng/rpcserver/user"
 	"fmt"
@@ -14,7 +15,7 @@ import (
 func main() {
 
 	var wg sync.WaitGroup
-	wg.Add(5)
+	wg.Add(6)
 
 	go func() { // INIT HTTP
 		defer wg.Done()
@@ -41,6 +42,13 @@ func main() {
 		var feedServer feedsrv.FeedSrvImpl
 		defer feedServer.Stop()
 		feedServer.Start()
+	}()
+
+	go func() { // INIT Comment RPC server
+		defer wg.Done()
+		var commentServer commentsrv.CommentSrvImpl
+		defer commentServer.Stop()
+		commentServer.Start()
 	}()
 
 	go func() { // INIT All RPC client
