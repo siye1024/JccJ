@@ -17,8 +17,8 @@ func initRouter(r *gin.Engine) {
 	apiRouter.POST("/user/login/", xhttp.Login)
 
 	apiRouter.GET("/feed/", xhttp.Feed)
-	//apiRouter.POST("/publish/action/", controller.Publish)
-	//apiRouter.GET("/publish/list/", controller.PublishList)
+	//apiRouter.POST("/publish/action/", xhttp.Publish)
+	//apiRouter.GET("/publish/list/", xhttp.PublishList)
 
 	// extra apis - I
 	//apiRouter.POST("/favorite/action/", controller.FavoriteAction)

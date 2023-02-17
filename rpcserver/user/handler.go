@@ -92,7 +92,6 @@ func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegister
 // Login implements the UserSrvImpl interface.
 func (s *UserSrvImpl) Login(ctx context.Context, req *user.DouyinUserRegisterRequest) (resp *user.DouyinUserRegisterResponse, err error) {
 	var (
-		//Jwt           *jwt.JWT
 		respStatusMsg = "User Login Success"
 		respErrorMag  = "Signature is Invalid"
 	)
@@ -142,7 +141,6 @@ func (s *UserSrvImpl) Login(ctx context.Context, req *user.DouyinUserRegisterReq
 // GetUserById implements the UserSrvImpl interface.
 func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserRequest) (resp *user.DouyinUserResponse, err error) {
 	var (
-		//Jwt           *jwt.JWT
 		respStatusMsg = "Get User's Info By ID Successfully"
 	)
 

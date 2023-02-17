@@ -125,8 +125,7 @@ func Login(c *gin.Context) {
 			"status_code": respStatusCode,
 			"status_msg":  respStatusMsg,
 		})
-		//log.Println("see here", resp, err, bizErr, isBizErr)
-		//SendResponse(c, resp)
+
 		return
 	}
 
@@ -180,8 +179,7 @@ func GetUserById(c *gin.Context) {
 			"status_code": respStatusCode,
 			"status_msg":  respStatusMsg,
 		})
-		//log.Println("see here", resp, err, bizErr, isBizErr)
-		//SendResponse(c, resp)
+
 		return
 	}
 
