@@ -7,4 +7,6 @@ func InitRpcClient() {
 
 	initCommentRpc()
 
+	initPublishRpc()
+
 }
