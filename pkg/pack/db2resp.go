@@ -4,7 +4,7 @@ import (
 	"context"
 	"dousheng/db"
 	"dousheng/rpcserver/feed/kitex_gen/feed"
-	"dousheng/rpcserver/user/kitex_gen/user"
+	"dousheng/rpcserver/feed/kitex_gen/user"
 	"errors"
 	"gorm.io/gorm"
 )
