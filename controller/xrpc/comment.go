@@ -18,7 +18,6 @@ var commentClient commentsrv.Client
 
 // Comment RPC 客户端初始化
 func initCommentRpc() {
-
 	r, err := etcd.NewEtcdResolver([]string{"127.0.0.1:2379"})
 	if err != nil {
 		log.Fatal(err)
@@ -51,11 +50,6 @@ func CommentAction(ctx context.Context, req *comment.DouyinCommentActionRequest)
 	if err != nil {
 		return nil, err
 	}
-	//TODO err define if needed
-	//if resp.StatusCode != 0 {
-	//
-	//	return nil, err//errno.NewErrNo(int(resp.StatusCode), *resp.StatusMsg)
-	//}
 	return resp, nil
 }
 
@@ -65,9 +59,5 @@ func CommentList(ctx context.Context, req *comment.DouyinCommentListRequest) (re
 	if err != nil {
 		return nil, err
 	}
-	//TODO err define if needed
-	//if resp.StatusCode != 0 {
-	//	return nil, errno.NewErrNo(int(resp.StatusCode), *resp.StatusMsg)
-	//}
 	return resp, nil
 }

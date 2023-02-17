@@ -2,8 +2,19 @@ package commentsrv
 
 import (
 	"context"
+<<<<<<< Updated upstream
 	comment "dousheng/rpcserver/kitex_gen/comment"
 	commentsrv "dousheng/rpcserver/kitex_gen/comment/commentsrv"
+=======
+	"dousheng/controller/xhttp"
+	"dousheng/controller/xrpc"
+	"dousheng/rpcserver/comment/api"
+
+	comment "dousheng/rpcserver/comment/kitex_gen/comment"
+	commentsrv "dousheng/rpcserver/comment/kitex_gen/comment/commentsrv"
+	"dousheng/rpcserver/user/kitex_gen/user"
+	"github.com/cloudwego/kitex/pkg/kerrors"
+>>>>>>> Stashed changes
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/pkg/transmeta"
@@ -18,8 +29,47 @@ type CommentSrvImpl struct{}
 
 // CommentAction implements the CommentSrvImpl interface.
 func (s *CommentSrvImpl) CommentAction(ctx context.Context, req *comment.DouyinCommentActionRequest) (resp *comment.DouyinCommentActionResponse, err error) {
-	// TODO: Your code here...
-	return
+	var (
+		respStatusMsg = "User Comment Success"
+	)
+	claim, err := xhttp.Jwt.ParseToken(req.Token)
+	if err != nil {
+		err := kerrors.NewBizStatusError(30007, "Get Token Error")
+		return nil, err
+	}
+
+	if req.UserId == 0 || claim.Id != 0 {
+		req.UserId = claim.Id
+	}
+
+	if req.ActionType != 1 && req.ActionType != 2 || req.UserId == 0 || req.VideoId == 0 {
+		err := kerrors.NewBizStatusError(30010, "Error occurred while binding the request body to the struct")
+		return nil, err
+	}
+
+	err = api.NewCommentActionService(ctx).CommentAction(req)
+	if err != nil {
+		return nil, err
+	}
+
+	userinfo, err := xrpc.GetUserById(ctx, &user.DouyinUserRequest{
+		UserId: req.UserId ,
+		Token:  req.Token,
+	})
+
+	//commentInfo := comment.Comment{
+	//	Id:  int64(req.VideoId),
+	//	User: userinfo.User,
+	//	Content: *req.CommentText,
+	//	CreateDate: ,
+	//}
+
+	resp = &comment.DouyinCommentActionResponse{
+		StatusCode: 0,
+		StatusMsg: &respStatusMsg,
+		Comment: &commentInfo,
+	}
+	return resp, nil
 }
 
 // CommentList implements the CommentSrvImpl interface.
