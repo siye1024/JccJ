@@ -6,6 +6,7 @@ import (
 	"dousheng/db"
 	"dousheng/pkg/jwt"
 	user "dousheng/rpcserver/user/kitex_gen/user"
+	"dousheng/rpcserver/user/kitex_gen/user/api"
 	svr "dousheng/rpcserver/user/kitex_gen/user/usersrv"
 	"github.com/cloudwego/kitex/pkg/kerrors"
 	"github.com/cloudwego/kitex/pkg/limit"
@@ -18,6 +19,17 @@ import (
 	"time"
 )
 
+// Arg2Config Directly set the parameters
+var (
+	Arg2Config = &api.Argon2Params{
+		Memory:      65536,
+		Iterations:  3,
+		Parallelism: 1,
+		SaltLength:  16,
+		KeyLength:   32,
+	}
+)
+
 // UserSrvImpl implements the last service interface defined in the IDL.
 type UserSrvImpl struct{}
 
@@ -25,46 +37,53 @@ type UserSrvImpl struct{}
 func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegisterRequest) (resp *user.DouyinUserRegisterResponse, err error) {
 	var (
 		respStatusMsg = "User Register Success"
+		respErrorMag  = "Signature is Invalid"
 	)
+
 	// empty username or password has been processed by user client
-	users, err := db.QueryUser(ctx, req.Username)
-	if err != nil {
+	if len(req.Username) == 0 || len(req.Password) == 0 {
+		err := kerrors.NewBizStatusError(10001, "Empty Username or Password")
 		return nil, err
 	}
-	if len(users) != 0 {
-		err := kerrors.NewBizStatusError(10002, "User Already Exist")
-		return nil, err
-	}
-
-	err = db.CreateUser(ctx, []*db.User{{
-		UserName: req.Username,
-		Password: req.Password,
-	}})
-	if err != nil {
+	// len of username or password exceed the 32 bit
+	if len(req.Username) > 32 || len(req.Password) > 32 {
+		err := kerrors.NewBizStatusError(10014, "Too Long Username or Password")
 		return nil, err
 	}
 
-	//TODO : AUOTO LOGIN
-	//TODO please complete login func and replace code here
-	users, err = db.QueryUser(ctx, req.Username)
+	err = api.NewCreateUserOp(ctx).CreateUser(req, Arg2Config)
 	if err != nil {
+		err := kerrors.NewBizStatusError(10013, "Register Failed")
 		return nil, err
 	}
-	loginUser := users[0]
-	uid := int64(loginUser.ID)
 
-	// Sign Key refers to xttp.common, is SoundDance here
+	//Auto Login
+	uid, err := api.NewCheckUserOp(ctx).CheckUser(req)
+	if err != nil {
+		resp = &user.DouyinUserRegisterResponse{
+			StatusCode: 10012,
+			StatusMsg:  &respErrorMag,
+		}
+		return resp, nil
+	}
+
 	token, err := xhttp.Jwt.CreateToken(jwt.CustomClaims{ //Claim is payload
 		Id:   int64(uid),
 		Time: time.Now().Unix(),
 	})
+	if err != nil {
+		resp = &user.DouyinUserRegisterResponse{
+			StatusCode: 10012,
+			StatusMsg:  &respErrorMag,
+		}
+		return resp, nil
+	}
 
-	//Register Success
 	resp = &user.DouyinUserRegisterResponse{
 		StatusCode: 0,
 		StatusMsg:  &respStatusMsg,
 		UserId:     uid,
-		Token:      token,
+		Token:      token, // successful resp must have token
 	}
 
 	return resp, nil
@@ -72,14 +91,116 @@ func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegister
 
 // Login implements the UserSrvImpl interface.
 func (s *UserSrvImpl) Login(ctx context.Context, req *user.DouyinUserRegisterRequest) (resp *user.DouyinUserRegisterResponse, err error) {
-	// TODO: Your code here...
-	return
+	var (
+		//Jwt           *jwt.JWT
+		respStatusMsg = "User Login Success"
+		respErrorMag  = "Signature is Invalid"
+	)
+	// empty username or password has been processed by dousheng client
+	if len(req.Username) == 0 || len(req.Password) == 0 {
+		err := kerrors.NewBizStatusError(10001, "Empty Username or Password")
+		return nil, err
+	}
+	// len of username or password exceed 32 bit
+	if len(req.Username) > 32 || len(req.Password) > 32 {
+		err := kerrors.NewBizStatusError(10014, "Too Long Username or Password")
+		return nil, err
+	}
+
+	// check the user's information
+	uid, err := api.NewCheckUserOp(ctx).CheckUser(req)
+	if err != nil {
+		resp = &user.DouyinUserRegisterResponse{
+			StatusCode: 10012,
+			StatusMsg:  &respErrorMag,
+		}
+		return resp, nil
+	}
+
+	token, err := xhttp.Jwt.CreateToken(jwt.CustomClaims{ //Claim is payload
+		Id:   int64(uid),
+		Time: time.Now().Unix(),
+	})
+	if err != nil {
+		resp = &user.DouyinUserRegisterResponse{
+			StatusCode: 10012,
+			StatusMsg:  &respErrorMag,
+		}
+		return resp, nil
+	}
+
+	resp = &user.DouyinUserRegisterResponse{
+		StatusCode: 0,
+		StatusMsg:  &respStatusMsg,
+		UserId:     uid,
+		Token:      token, // successful resp must have token
+	}
+
+	return resp, nil
 }
 
 // GetUserById implements the UserSrvImpl interface.
 func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserRequest) (resp *user.DouyinUserResponse, err error) {
-	// TODO: Your code here...
-	return
+	var (
+		//Jwt           *jwt.JWT
+		respStatusMsg = "Get User's Info By ID Successfully"
+	)
+
+	claim, err := xhttp.Jwt.ParseToken(req.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.UserId < 0 {
+		return nil, err
+	}
+
+	u := new(user.User)
+	if err := db.DB.WithContext(ctx).First(&u, req.UserId).Error; err != nil {
+		return nil, err
+	}
+
+	if u == nil {
+		err := kerrors.NewBizStatusError(10009, "User Already Withdraw")
+		return nil, err
+	}
+
+	follow_count := int64(*u.FollowCount)
+	follower_count := int64(*u.FollowerCount)
+
+	// true means the claim.id has follow the modelUser.id, false means not follow
+
+	isFollow := false
+	/*
+		relation := new(db.Relation)
+		if err := db.DB.WithContext(ctx).First(&relation, "user_id = ? and to_user_id = ?", claim.Id, int64(u.Id)).Error; err != nil {
+			return nil, err
+		}
+
+		if relation != nil {
+			isFollow = true
+		}
+	*/
+	userInfo := &user.User{
+		Id:            int64(u.Id),
+		Name:          u.Name,
+		FollowCount:   &follow_count,
+		FollowerCount: &follower_count,
+		IsFollow:      isFollow,
+	}
+
+	if claim.Id == req.UserId {
+		userInfo.IsFollow = true
+	} else {
+		userInfo.IsFollow = false
+	}
+
+	resp = &user.DouyinUserResponse{
+		StatusCode: 0,
+		StatusMsg:  &respStatusMsg,
+		User:       userInfo,
+	}
+	return resp, nil
 }
 
 func (s *UserSrvImpl) Start() {

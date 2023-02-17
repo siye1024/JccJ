@@ -12,9 +12,9 @@ func initRouter(r *gin.Engine) {
 	apiRouter := r.Group("/douyin")
 
 	// basic apis
-	//apiRouter.GET("/user/", http.UserInfo)
+	apiRouter.GET("/user/", xhttp.GetUserById)
 	apiRouter.POST("/user/register/", xhttp.Register)
-	//apiRouter.POST("/user/login/", http.Login)
+	apiRouter.POST("/user/login/", xhttp.Login)
 
 	apiRouter.GET("/feed/", xhttp.Feed)
 	//apiRouter.POST("/publish/action/", controller.Publish)
