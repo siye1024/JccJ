@@ -9,7 +9,7 @@
 -	10005				Token is not active yet
 -	10006				Couldn't handle this token
 -	10007				Invalid Username
--	10008				Invalid Password
+-	10008				Invalid Username or Password
 -	10009				User Already Withdraw
 -	10010				Encoded Hash isn't in the correct format
 -	10011				Encoded Hash isn't in the correct version
@@ -50,7 +50,7 @@ func Register(c *gin.Context) {
 	if len(registerMsg.UserName) > 32 || len(registerMsg.PassWord) > 32 {
 		SendResponse(c, gin.H{
 			"status_code": 10014,
-			"status_msg": "Too Long Username or Password",
+			"status_msg":  "Too Long Username or Password",
 		})
 		return
 	}
@@ -102,7 +102,7 @@ func Login(c *gin.Context) {
 	if len(logMsg.UserName) > 32 || len(logMsg.PassWord) > 32 {
 		SendResponse(c, gin.H{
 			"status_code": 10014,
-			"status_msg": "Too Long Username or Password",
+			"status_msg":  "Too Long Username or Password",
 		})
 		return
 	}

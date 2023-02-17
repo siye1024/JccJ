@@ -37,7 +37,6 @@ type UserSrvImpl struct{}
 func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegisterRequest) (resp *user.DouyinUserRegisterResponse, err error) {
 	var (
 		respStatusMsg = "User Register Success"
-		respErrorMag  = "Signature is Invalid"
 	)
 
 	// empty username or password has been processed by user client
@@ -53,18 +52,19 @@ func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegister
 
 	err = api.NewCreateUserOp(ctx).CreateUser(req, Arg2Config)
 	if err != nil {
-		err := kerrors.NewBizStatusError(10013, "Register Failed")
+		//err := kerrors.NewBizStatusError(10013, "Register Failed")
 		return nil, err
 	}
 
 	//Auto Login
 	uid, err := api.NewCheckUserOp(ctx).CheckUser(req)
 	if err != nil {
-		resp = &user.DouyinUserRegisterResponse{
-			StatusCode: 10012,
-			StatusMsg:  &respErrorMag,
-		}
-		return resp, nil
+		//resp = &user.DouyinUserRegisterResponse{
+		//	StatusCode: 10012,
+		//	StatusMsg:  &respErrorMag,
+		//}
+		//return resp, nil
+		return nil, err
 	}
 
 	token, err := xhttp.Jwt.CreateToken(jwt.CustomClaims{ //Claim is payload
@@ -72,11 +72,11 @@ func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegister
 		Time: time.Now().Unix(),
 	})
 	if err != nil {
-		resp = &user.DouyinUserRegisterResponse{
-			StatusCode: 10012,
-			StatusMsg:  &respErrorMag,
-		}
-		return resp, nil
+		//resp = &user.DouyinUserRegisterResponse{
+		//	StatusCode: 10012,
+		//	StatusMsg:  &respErrorMag,
+		//}
+		return nil, err
 	}
 
 	resp = &user.DouyinUserRegisterResponse{
