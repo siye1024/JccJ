@@ -169,6 +169,7 @@ func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserReque
 	// true means the claim.id has follow the modelUser.id, false means not follow
 
 	isFollow := false
+	//TODO
 	/*
 		relation := new(db.Relation)
 		if err := db.DB.WithContext(ctx).First(&relation, "user_id = ? and to_user_id = ?", claim.Id, int64(u.Id)).Error; err != nil {
