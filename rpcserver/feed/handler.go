@@ -5,8 +5,9 @@ import (
 	"dousheng/controller/xhttp"
 	"dousheng/db"
 	"dousheng/pkg/pack"
-	feed "dousheng/rpcserver/feed/kitex_gen/feed"
-	feedsrv "dousheng/rpcserver/feed/kitex_gen/feed/feedsrv"
+	feed "dousheng/rpcserver/kitex_gen/feed"
+	feedsrv "dousheng/rpcserver/kitex_gen/feed/feedsrv"
+	"errors"
 	"time"
 
 	"github.com/cloudwego/kitex/pkg/limit"
@@ -71,7 +72,7 @@ func (s *FeedSrvImpl) GetUserFeed(ctx context.Context, req *feed.DouyinFeedReque
 // GetVideoById implements the FeedSrvImpl interface.
 func (s *FeedSrvImpl) GetVideoById(ctx context.Context, req *feed.VideoIdRequest) (resp *feed.Video, err error) {
 	// TODO: Your code here...
-	return
+	return nil, errors.New("Unsupport Service")
 }
 func (s *FeedSrvImpl) Start() {
 	r, err := etcd.NewEtcdRegistry([]string{"127.0.0.1:2379"})

@@ -2,8 +2,8 @@ package xrpc
 
 import (
 	"context"
-	"dousheng/rpcserver/comment/kitex_gen/comment"
-	"dousheng/rpcserver/comment/kitex_gen/comment/commentsrv"
+	"dousheng/rpcserver/kitex_gen/comment"
+	"dousheng/rpcserver/kitex_gen/comment/commentsrv"
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/retry"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"

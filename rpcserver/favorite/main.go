@@ -1,7 +1,7 @@
 package main
 
 import (
-	favorite "dousheng/rpcserver/favorite/kitex_gen/favorite/favoritesrv"
+	favorite "dousheng/rpcserver/kitex_gen/favorite/favoritesrv"
 	"log"
 )
 

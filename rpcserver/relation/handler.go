@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	relation "dousheng/rpcserver/relation/kitex_gen/relation"
+	relation "dousheng/rpcserver/kitex_gen/relation"
 )
 
 // RelationSrvImpl implements the last service interface defined in the IDL.

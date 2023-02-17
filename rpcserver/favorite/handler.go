@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	favorite "dousheng/rpcserver/favorite/kitex_gen/favorite"
+	favorite "dousheng/rpcserver/kitex_gen/favorite"
 )
 
 // FavoriteSrvImpl implements the last service interface defined in the IDL.

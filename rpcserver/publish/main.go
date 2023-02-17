@@ -1,7 +1,7 @@
 package main
 
 import (
-	publish "dousheng/rpcserver/publish/kitex_gen/publish/publishsrv"
+	publish "dousheng/rpcserver/kitex_gen/publish/publishsrv"
 	"log"
 )
 

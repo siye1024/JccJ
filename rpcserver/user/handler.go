@@ -5,9 +5,9 @@ import (
 	"dousheng/controller/xhttp"
 	"dousheng/db"
 	"dousheng/pkg/jwt"
-	user "dousheng/rpcserver/user/kitex_gen/user"
-	"dousheng/rpcserver/user/kitex_gen/user/api"
-	svr "dousheng/rpcserver/user/kitex_gen/user/usersrv"
+	user "dousheng/rpcserver/kitex_gen/user"
+	svr "dousheng/rpcserver/kitex_gen/user/usersrv"
+	api2 "dousheng/rpcserver/user/api"
 	"github.com/cloudwego/kitex/pkg/kerrors"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -21,7 +21,7 @@ import (
 
 // Arg2Config Directly set the parameters
 var (
-	Arg2Config = &api.Argon2Params{
+	Arg2Config = &api2.Argon2Params{
 		Memory:      65536,
 		Iterations:  3,
 		Parallelism: 1,
@@ -50,14 +50,14 @@ func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegister
 		return nil, err
 	}
 
-	err = api.NewCreateUserOp(ctx).CreateUser(req, Arg2Config)
+	err = api2.NewCreateUserOp(ctx).CreateUser(req, Arg2Config)
 	if err != nil {
 		//err := kerrors.NewBizStatusError(10013, "Register Failed")
 		return nil, err
 	}
 
 	//Auto Login
-	uid, err := api.NewCheckUserOp(ctx).CheckUser(req)
+	uid, err := api2.NewCheckUserOp(ctx).CheckUser(req)
 	if err != nil {
 		//resp = &user.DouyinUserRegisterResponse{
 		//	StatusCode: 10012,
@@ -107,7 +107,7 @@ func (s *UserSrvImpl) Login(ctx context.Context, req *user.DouyinUserRegisterReq
 	}
 
 	// check the user's information
-	uid, err := api.NewCheckUserOp(ctx).CheckUser(req)
+	uid, err := api2.NewCheckUserOp(ctx).CheckUser(req)
 	if err != nil {
 		resp = &user.DouyinUserRegisterResponse{
 			StatusCode: 10012,
