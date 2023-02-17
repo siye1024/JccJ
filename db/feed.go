@@ -1,9 +1,9 @@
 package db
 
 import (
-	"time"
-
+	"context"
 	"gorm.io/gorm"
+	"time"
 )
 
 // Video Gorm Data Structures
@@ -22,4 +22,14 @@ type Video struct {
 
 func (Video) TableName() string {
 	return "videos"
+}
+func MGetVideos(ctx context.Context, limit int, latestTime *int64) ([]*Video, error) {
+	videos := make([]*Video, 0)
+
+	conn := DB.WithContext(ctx)
+
+	if err := conn.Limit(limit).Order("update_time desc").Find(&videos, "update_time < ?", time.UnixMilli(*latestTime)).Error; err != nil {
+		return nil, err
+	}
+	return videos, nil
 }

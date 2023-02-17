@@ -2,8 +2,13 @@ package feedsrv
 
 import (
 	"context"
+	"dousheng/controller/xhttp"
+	"dousheng/db"
+	"dousheng/pkg/pack"
 	feed "dousheng/rpcserver/feed/kitex_gen/feed"
 	feedsrv "dousheng/rpcserver/feed/kitex_gen/feed/feedsrv"
+	"time"
+
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
@@ -12,19 +17,53 @@ import (
 	"net"
 )
 
+const (
+	LIMIT = 30 // 单次返回最大视频数
+)
+
 // FeedSrvImpl implements the last service interface defined in the IDL.
 type FeedSrvImpl struct{}
 
 // GetUserFeed implements the FeedSrvImpl interface.
 func (s *FeedSrvImpl) GetUserFeed(ctx context.Context, req *feed.DouyinFeedRequest) (resp *feed.DouyinFeedResponse, err error) {
-	// TODO: Your code here...
-	log.Println("correct")
 	var (
+		uid           int64 = 0
+		nextTime      int64
 		respStatusMsg = "User Register Success"
 	)
+	//do not need to check latest time again
+	//check Token
+	if len(*req.Token) != 0 {
+		claim, err := xhttp.Jwt.ParseToken(*req.Token)
+		if err != nil {
+			return nil, err
+		} else {
+			uid = claim.Id
+		}
+	}
+
+	videos, err := db.MGetVideos(ctx, LIMIT, req.LatestTime)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(videos) < LIMIT {
+		nextTime = time.Now().UnixMilli() //reset time if rest videos are less than LIMIT
+	} else {
+		nextTime = videos[len(videos)-1].UpdatedAt.UnixMilli()
+	}
+
+	vis, err := pack.PackVideos(ctx, videos, &uid)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
 	resp = &feed.DouyinFeedResponse{
 		StatusCode: 0,
 		StatusMsg:  &respStatusMsg,
+		VideoList:  vis,
+		NextTime:   &nextTime,
 	}
 	return resp, nil
 }
