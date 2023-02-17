@@ -21,15 +21,15 @@ func Feed(c *gin.Context) {
 	var (
 		feedVar        FeedParam
 		latestTime     int64
-		token          string = "xzl"
-		respStatusCode        = -1
-		respStatusMsg         = "Feed Get Error"
+		token          string
+		respStatusCode = -1
+		respStatusMsg  = "Video Feed Get Error"
 	)
 	//check latest time here because we need to do Atoi
 	lastst_time := c.Query("latest_time")
 	if len(lastst_time) != 0 {
 		if parsetime, err := strconv.Atoi(lastst_time); err != nil {
-			log.Print(err)
+			log.Println(err)
 			SendResponse(c, gin.H{"status_code": respStatusCode, "status_msg": respStatusMsg})
 			return
 		} else { // valid latest time
