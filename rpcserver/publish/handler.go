@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
-	publish "dousheng/rpcserver/publish/kitex_gen/publish"
-	publishsrv "dousheng/rpcserver/publish/kitex_gen/publish/publishsrv"
+	"dousheng/controller/xhttp"
+	publish "dousheng/rpcserver/kitex_gen/publish"
+	publishsrv "dousheng/rpcserver/kitex_gen/publish/publishsrv"
+	"github.com/cloudwego/kitex/pkg/kerrors"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/pkg/transmeta"
@@ -18,7 +20,15 @@ type PublishSrvImpl struct{}
 
 // PublishAction implements the PublishSrvImpl interface.
 func (s *PublishSrvImpl) PublishAction(ctx context.Context, req *publish.DouyinPublishActionRequest) (resp *publish.DouyinPublishActionResponse, err error) {
-	// TODO: Your code here...
+	claim, err := xhttp.Jwt.ParseToken(req.Token)
+	if err != nil {
+		return nil, err
+	}
+	log.Println(claim)
+	if len(req.Data) == 0 || len(req.Title) == 0 {
+		return nil, kerrors.NewBizStatusError(20001, "Empty Video Data or Empty Title")
+	}
+
 	return
 }
 

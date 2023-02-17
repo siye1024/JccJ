@@ -2,8 +2,8 @@ package xrpc
 
 import (
 	"context"
-	"dousheng/rpcserver/publish/kitex_gen/publish"
-	"dousheng/rpcserver/publish/kitex_gen/publish/publishsrv"
+	"dousheng/rpcserver/kitex_gen/publish"
+	"dousheng/rpcserver/kitex_gen/publish/publishsrv"
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/retry"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -47,9 +47,7 @@ func PublishAction(ctx context.Context, req *publish.DouyinPublishActionRequest)
 	if err != nil {
 		return nil, err
 	}
-	//if resp.StatusCode != 0 {
-	//	return nil, errno.NewErrNo(int(resp.StatusCode), *resp.StatusMsg)
-	//}
+
 	return resp, nil
 }
 
@@ -59,8 +57,6 @@ func PublishList(ctx context.Context, req *publish.DouyinPublishListRequest) (re
 	if err != nil {
 		return nil, err
 	}
-	//if resp.StatusCode != 0 {
-	//	return nil, errno.NewErrNo(int(resp.StatusCode), *resp.StatusMsg)
-	//}
+
 	return resp, nil
 }

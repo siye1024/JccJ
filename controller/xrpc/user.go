@@ -2,8 +2,8 @@ package xrpc
 
 import (
 	"context"
-	"dousheng/rpcserver/user/kitex_gen/user"
-	"dousheng/rpcserver/user/kitex_gen/user/usersrv"
+	"dousheng/rpcserver/kitex_gen/user"
+	"dousheng/rpcserver/kitex_gen/user/usersrv"
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/retry"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"

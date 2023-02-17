@@ -2,8 +2,8 @@ package xrpc
 
 import (
 	"context"
-	"dousheng/rpcserver/feed/kitex_gen/feed"
-	"dousheng/rpcserver/feed/kitex_gen/feed/feedsrv"
+	"dousheng/rpcserver/kitex_gen/feed"
+	"dousheng/rpcserver/kitex_gen/feed/feedsrv"
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/retry"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -50,8 +50,6 @@ func Feed(ctx context.Context, req *feed.DouyinFeedRequest) (resp *feed.DouyinFe
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode != 0 {
-		return nil, err
-	}
+
 	return resp, nil
 }

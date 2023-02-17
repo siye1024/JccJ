@@ -1,7 +1,7 @@
 package main
 
 import (
-	relation "dousheng/rpcserver/relation/kitex_gen/relation/relationsrv"
+	relation "dousheng/rpcserver/kitex_gen/relation/relationsrv"
 	"log"
 )
 

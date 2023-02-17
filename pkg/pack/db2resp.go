@@ -3,8 +3,8 @@ package pack
 import (
 	"context"
 	"dousheng/db"
-	"dousheng/rpcserver/feed/kitex_gen/feed"
-	"dousheng/rpcserver/feed/kitex_gen/user"
+	"dousheng/rpcserver/kitex_gen/feed"
+	"dousheng/rpcserver/kitex_gen/user"
 	"errors"
 	"gorm.io/gorm"
 )

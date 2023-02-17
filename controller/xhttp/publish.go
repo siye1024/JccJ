@@ -2,6 +2,7 @@
 	resp.StatusCode		resp.StatusMsg
 
 - 	0					success
+-	20001				Empty Video Data or Empty Title
 -	-1					Service Process Error
 */
 
@@ -10,7 +11,7 @@ package xhttp
 import (
 	"bytes"
 	"dousheng/controller/xrpc"
-	"dousheng/rpcserver/publish/kitex_gen/publish"
+	"dousheng/rpcserver/kitex_gen/publish"
 	"github.com/cloudwego/kitex/pkg/kerrors"
 	"github.com/gin-gonic/gin"
 	"io"

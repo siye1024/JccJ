@@ -9,7 +9,7 @@ package xhttp
 
 import (
 	"dousheng/controller/xrpc"
-	"dousheng/rpcserver/feed/kitex_gen/feed"
+	"dousheng/rpcserver/kitex_gen/feed"
 	"github.com/gin-gonic/gin"
 	"log"
 	"strconv"

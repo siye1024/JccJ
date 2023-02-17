@@ -2,8 +2,8 @@ package commentsrv
 
 import (
 	"context"
-	comment "dousheng/rpcserver/comment/kitex_gen/comment"
-	commentsrv "dousheng/rpcserver/comment/kitex_gen/comment/commentsrv"
+	comment "dousheng/rpcserver/kitex_gen/comment"
+	commentsrv "dousheng/rpcserver/kitex_gen/comment/commentsrv"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/pkg/transmeta"

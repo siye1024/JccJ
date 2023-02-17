@@ -22,7 +22,7 @@ package xhttp
 
 import (
 	"dousheng/controller/xrpc"
-	"dousheng/rpcserver/user/kitex_gen/user"
+	"dousheng/rpcserver/kitex_gen/user"
 	"github.com/cloudwego/kitex/pkg/kerrors"
 	"github.com/gin-gonic/gin"
 	"log"

@@ -5,8 +5,8 @@ import (
 	"dousheng/controller/xhttp"
 	"dousheng/db"
 	"dousheng/pkg/pack"
-	feed "dousheng/rpcserver/feed/kitex_gen/feed"
-	feedsrv "dousheng/rpcserver/feed/kitex_gen/feed/feedsrv"
+	feed "dousheng/rpcserver/kitex_gen/feed"
+	feedsrv "dousheng/rpcserver/kitex_gen/feed/feedsrv"
 	"errors"
 	"time"
 
