@@ -50,7 +50,7 @@ func (s *CheckUserOp) CheckUser(req *user.DouyinUserRegisterRequest) (int64, err
 	}
 
 	if !pwdMatch {
-		err := kerrors.NewBizStatusError(10008, "Invalid Password")
+		err := kerrors.NewBizStatusError(10008, "Invalid Username of Password")
 		return 0, err
 	}
 
@@ -59,7 +59,7 @@ func (s *CheckUserOp) CheckUser(req *user.DouyinUserRegisterRequest) (int64, err
 
 // cmpPasswordAndHash compares the password and hash of the input password
 func cmpPasswordAndHash(password, encodedHash string) (match bool, err error) {
-	// get the parameters, salt and the decoded the password hash
+	// get the parameters, salt and decoded the password hash
 	arg2Params, salt, hash, err := decodeHash(encodedHash)
 	if err != nil {
 		return false, err
