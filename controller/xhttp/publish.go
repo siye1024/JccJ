@@ -3,7 +3,10 @@
 
 - 	0					success
 -	20001				Empty Video Data or Empty Title
--	-1					Service Process Error
+-	20002				Fail to Get url of the Video
+-	21001				Invalid User or User Token
+-	-1					Video Publish Error
+-	-2					Get User Publish List Error
 */
 
 package xhttp
@@ -16,6 +19,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"io"
 	"log"
+	"strconv"
 )
 
 func PublishAction(c *gin.Context) {
@@ -71,7 +75,6 @@ func PublishAction(c *gin.Context) {
 			"status_code": respStatusCode,
 			"status_msg":  respStatusMsg,
 		})
-
 		return
 	}
 
@@ -79,5 +82,47 @@ func PublishAction(c *gin.Context) {
 }
 
 func PublishList(c *gin.Context) {
+	var (
+		paramVar       UserParam
+		respStatusCode = -2
+		respStatusMsg  = "Get User Publish List Error"
+	)
+
+	user_id, err := strconv.Atoi(c.Query("user_id"))
+	if err != nil {
+		log.Println(err)
+		SendResponse(c, gin.H{"status_code": respStatusCode, "status_msg": respStatusMsg})
+		return
+	}
+
+	paramVar.UserId = int64(user_id)
+	paramVar.Token = c.Query("token")
+
+	if len(paramVar.Token) == 0 || paramVar.UserId < 0 {
+		respStatusMsg = "Invalid Login User"
+		SendResponse(c, gin.H{"status_code": 21001, "status_msg": respStatusMsg})
+		return
+	}
+
+	resp, err := xrpc.PublishList(c, &publish.DouyinPublishListRequest{
+		UserId: paramVar.UserId,
+		Token:  paramVar.Token,
+	})
+	bizErr, isBizErr := kerrors.FromBizStatusError(err)
+	if isBizErr == true || err != nil {
+		if isBizErr == false { // if it is not business error
+			log.Println(err)
+		} else { // business err
+			respStatusCode = int(bizErr.BizStatusCode())
+			respStatusMsg = bizErr.BizMessage()
+		}
+		SendResponse(c, gin.H{
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
+		})
+		return
+	}
+
+	SendResponse(c, resp) // service success
 
 }

@@ -11,6 +11,7 @@ require (
 
 require (
 	github.com/apache/thrift v0.13.0 // indirect
+	github.com/aws/aws-sdk-go v1.38.20 // indirect
 	github.com/bytedance/gopkg v0.0.0-20220531084716-665b4f21126f // indirect
 	github.com/chenzhuoyu/iasm v0.0.0-20220818063314-28c361dae733 // indirect
 	github.com/choleraehyq/pid v0.0.15 // indirect
@@ -26,6 +27,7 @@ require (
 	github.com/go-playground/validator/v10 v10.11.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/goccy/go-json v0.10.0 // indirect
+	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
@@ -34,6 +36,7 @@ require (
 	github.com/jhump/protoreflect v1.8.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kitex-contrib/registry-etcd v0.1.0 // indirect
 	github.com/klauspost/compress v1.15.9 // indirect
@@ -53,6 +56,8 @@ require (
 	github.com/tidwall/gjson v1.9.3 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
+	github.com/u2takey/ffmpeg-go v0.4.1 // indirect
+	github.com/u2takey/go-utils v0.3.1 // indirect
 	github.com/ugorji/go/codec v1.2.9 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.5 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.5 // indirect

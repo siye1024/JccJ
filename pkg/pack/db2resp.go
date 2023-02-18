@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// fromID is the uid of the request user, not video author
+// fromID is the uid of the request user, possible not video author
 func PackVideos(ctx context.Context, vs []*db.Video, fromID *int64) ([]*feed.Video, error) {
 	videos := make([]*feed.Video, 0)
 	for _, v := range vs {
@@ -88,12 +88,16 @@ func PackUser(ctx context.Context, u *db.User, fromID int64) (*user.User, error)
 
 	// true means fromID has followed u.ID
 	isFollow := false
-	relation, err := db.GetRelation(ctx, fromID, int64(u.ID))
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
-	}
-	if relation != nil {
+	if fromID == int64(u.ID) { // I have followed myself
 		isFollow = true
+	} else {
+		relation, err := db.GetRelation(ctx, fromID, int64(u.ID))
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
+		if relation != nil {
+			isFollow = true
+		}
 	}
 
 	return &user.User{
