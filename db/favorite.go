@@ -39,6 +39,12 @@ func Favorite(ctx context.Context, uid int64, vid int64) error {
 			return err
 		}
 
+		// query the user whether favorite this video, if favorite, do nothing
+		_, err := GetFavoriteRelation(ctx, uid, vid)
+		if err == nil {
+			return nil
+		}
+
 		if err := tx.WithContext(ctx).Model(&user).Association("FavoriteVideos").Append(video); err != nil {
 			return err
 		}
