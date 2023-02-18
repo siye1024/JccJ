@@ -9,6 +9,7 @@ import (
 	"dousheng/pkg/pack"
 	publish "dousheng/rpcserver/kitex_gen/publish"
 	publishsrv "dousheng/rpcserver/kitex_gen/publish/publishsrv"
+	"fmt"
 	"github.com/cloudwego/kitex/pkg/kerrors"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -16,8 +17,12 @@ import (
 	"github.com/cloudwego/kitex/server"
 	"github.com/gofrs/uuid"
 	etcd "github.com/kitex-contrib/registry-etcd"
+	ffmpeg "github.com/u2takey/ffmpeg-go"
+	"image"
+	"image/jpeg"
 	"log"
 	"net"
+	"os"
 	"strings"
 )
 
@@ -45,7 +50,7 @@ func (s *PublishSrvImpl) PublishAction(ctx context.Context, req *publish.DouyinP
 	}
 	fileName := u2.String() + ".mp4" // assign video name across uuid
 	// upload video
-	err = xminio.UploadFile(MinioVideoBucketName, fileName, videoReader, int64(len(videoData)))
+	err = xminio.UploadFile(MinioVideoBucketName, fileName, videoReader, int64(len(videoData)), "video/mp4")
 	if err != nil {
 		return nil, err
 	}
@@ -54,23 +59,25 @@ func (s *PublishSrvImpl) PublishAction(ctx context.Context, req *publish.DouyinP
 	if err != nil {
 		return nil, err
 	}
+
 	playUrl := strings.Split(url.String(), "?")[0]
 	if err != nil {
 		return nil, err
 	}
+
 	//process video cover
 	u3, err := uuid.NewV4()
 	if err != nil {
 		return nil, err
 	}
 	coverName := u3.String() + ".jpg"
-	coverData, err := xminio.ReadFrameAsJpeg(playUrl)
+	coverData, err := ReadFrameAsJpeg(playUrl)
 	if err != nil {
 		return nil, err
 	}
 	//upload video cover
 	coverReader := bytes.NewReader(coverData)
-	err = xminio.UploadFile(MinioVideoBucketName, coverName, coverReader, int64(len(coverData)))
+	err = xminio.UploadFile(MinioVideoBucketName, coverName, coverReader, int64(len(coverData)), "cover/jpg")
 	if err != nil {
 		return nil, err
 	}
@@ -147,9 +154,9 @@ func (s *PublishSrvImpl) Start() {
 		server.WithMetaHandler(transmeta.ServerTTHeaderHandler), //support kerrors
 		//server.WithMiddleware(middleware.CommonMiddleware),                 // middleware
 		//server.WithMiddleware(middleware.ServerMiddleware),                 // middleware
-		server.WithRegistry(r),                                             // registry
+		server.WithRegistry(r), // registry
 		server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}), // limit
-		server.WithMuxTransport(),                                          // Multiplex
+		server.WithMuxTransport(), // Multiplex
 		//server.WithSuite(tracing.NewServerSuite()),                         // trace
 		// Please keep the same as provider.WithServiceName
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: "videoPublish"}),
@@ -164,4 +171,29 @@ func (s *PublishSrvImpl) Start() {
 }
 func (s *PublishSrvImpl) Stop() {
 	log.Println("Stop Publish RPC service...")
+}
+
+// ReadFrameAsJpeg
+// 从视频流中截取一帧并返回 需要在本地环境中安装ffmpeg并将bin添加到环境变量
+func ReadFrameAsJpeg(filePath string) ([]byte, error) {
+	reader := bytes.NewBuffer(nil)
+
+	err := ffmpeg.Input(filePath).
+		Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", 1)}).
+		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
+		WithOutput(reader, os.Stdout).
+		Run()
+
+	if err != nil {
+		return nil, err
+	}
+	img, _, err := image.Decode(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	buf := new(bytes.Buffer)
+	jpeg.Encode(buf, img, nil) // jpeg存储空间比png小，更适合做缩略图
+
+	return buf.Bytes(), err
 }

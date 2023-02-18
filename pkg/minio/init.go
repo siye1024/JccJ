@@ -9,12 +9,12 @@ import (
 
 var (
 	minioClient     *minio.Client
-	Endpoint        = "localhost:9000"
+	Endpoint        = "192.168.1.104:9000"
 	AccessKeyID     = "doushengMinio"
 	SecretAccessKey = "doushengMinio"
 	UseSSL          = false
 	BucketName      = "doushengjccj"
-	Location        = "chengdu"
+	//Location        = "chengdu"
 )
 
 func init() {
@@ -32,7 +32,7 @@ func init() {
 	log.Println("minio client init successfully")
 	minioClient = client
 
-	err = minioClient.MakeBucket(ctx, BucketName, minio.MakeBucketOptions{Region: Location})
+	err = minioClient.MakeBucket(ctx, BucketName, minio.MakeBucketOptions{})
 	if err != nil {
 		exists, errBucketExists := minioClient.BucketExists(ctx, BucketName)
 		if errBucketExists == nil && exists {
