@@ -5,7 +5,10 @@ import (
 	"dousheng/db"
 	commentsrv "dousheng/rpcserver/comment"
 	feedsrv "dousheng/rpcserver/feed"
+	publishsrv "dousheng/rpcserver/publish"
+	relationsrv "dousheng/rpcserver/relation"
 	usersrv "dousheng/rpcserver/user"
+
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"sync"
@@ -49,6 +52,20 @@ func main() {
 		var commentServer commentsrv.CommentSrvImpl
 		defer commentServer.Stop()
 		commentServer.Start()
+	}()
+
+	go func() { // INIT Publish RPC server
+		defer wg.Done()
+		var publishServer publishsrv.PublishSrvImpl
+		defer publishServer.Stop()
+		publishServer.Start()
+	}()
+
+	go func() { // INIT Comment RPC server
+		defer wg.Done()
+		var relationServer relationsrv.RelationSrvImpl
+		defer relationServer.Stop()
+		relationServer.Start()
 	}()
 
 	go func() { // INIT All RPC client

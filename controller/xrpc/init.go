@@ -9,4 +9,6 @@ func InitRpcClient() {
 
 	initPublishRpc()
 
+	initRelationRpc()
+
 }
