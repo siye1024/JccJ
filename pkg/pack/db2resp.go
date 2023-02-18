@@ -3,6 +3,7 @@ package pack
 import (
 	"context"
 	"dousheng/db"
+	"dousheng/rpcserver/kitex_gen/comment"
 	"dousheng/rpcserver/kitex_gen/feed"
 	"dousheng/rpcserver/kitex_gen/user"
 	"errors"
@@ -102,4 +103,56 @@ func PackUser(ctx context.Context, u *db.User, fromID int64) (*user.User, error)
 		FollowerCount: &follower_count,
 		IsFollow:      isFollow,
 	}, nil
+}
+
+// PackComments pack Comments info.
+func PackComments(ctx context.Context, vs []*db.Comment, fromID int64) ([]*comment.Comment, error) {
+	comments := make([]*comment.Comment, 0)
+	for _, v := range vs {
+		user, err := db.GetUserByID(ctx, int64(v.UserID))
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
+
+		packUser, err := PackUser(ctx, user, fromID)
+		if err != nil {
+			return nil, err
+		}
+
+		comments = append(comments, &comment.Comment{
+			Id:         int64(v.ID),
+			User:       packUser,
+			Content:    v.Content,
+			CreateDate: v.CreatedAt.Format("01-02"),
+		})
+	}
+	return comments, nil
+}
+
+// PackFollowingList pack lists of following info.
+func PackFollowingList(ctx context.Context, vs []*db.Relation, fromID int64) ([]*user.User, error) {
+	users := make([]*db.User, 0)
+	for _, v := range vs {
+		user2, err := db.GetUserByID(ctx, int64(v.ToUserID))
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
+		users = append(users, user2)
+	}
+
+	return PackUsers(ctx, users, fromID)
+}
+
+// PackFollowerList pack lists of follower info.
+func PackFollowerList(ctx context.Context, vs []*db.Relation, fromID int64) ([]*user.User, error) {
+	users := make([]*db.User, 0)
+	for _, v := range vs {
+		user2, err := db.GetUserByID(ctx, int64(v.UserID))
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
+		users = append(users, user2)
+	}
+
+	return PackUsers(ctx, users, fromID)
 }

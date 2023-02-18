@@ -130,7 +130,6 @@ func Login(c *gin.Context) {
 	}
 
 	SendResponse(c, resp) // service success
-
 }
 
 // Get User's ID OP
