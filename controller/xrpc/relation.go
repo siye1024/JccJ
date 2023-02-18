@@ -2,8 +2,8 @@ package xrpc
 
 import (
 	"context"
-	"dousheng/rpcserver/kitex_gen/user"
-	"dousheng/rpcserver/kitex_gen/user/usersrv"
+	"dousheng/rpcserver/kitex_gen/relation"
+	"dousheng/rpcserver/kitex_gen/relation/relationsrv"
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/retry"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -14,16 +14,17 @@ import (
 	"time"
 )
 
-var userClient usersrv.Client
+var relationClient relationsrv.Client
 
-func initUserRpc() {
+// Relation RPC 客户端初始化
+func initRelationRpc() {
 	r, err := etcd.NewEtcdResolver([]string{"127.0.0.1:2379"})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	client, err := usersrv.NewClient(
-		"userRegisterLoginGetInfo",
+	client, err := relationsrv.NewClient(
+		"relationService",
 		client.WithTransportProtocol(transport.TTHeader),        //to support mux read check protocol
 		client.WithMetaHandler(transmeta.ClientTTHeaderHandler), //to support kerrors
 		//client.WithMiddleware(middleware.CommonMiddleware),
@@ -35,32 +36,36 @@ func initUserRpc() {
 		//client.WithSuite(tracing.NewClientSuite()),        // tracer
 		client.WithResolver(r), // resolver
 		// Please keep the same as provider.WithServiceName
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: "userRegisterLoginGetInfo"}),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: "relationService"}),
 	)
 	if err != nil {
 		panic(err)
 	}
-	userClient = client
+	relationClient = client
 }
 
-func Register(ctx context.Context, req *user.DouyinUserRegisterRequest) (resp *user.DouyinUserRegisterResponse, err error) {
-	resp, err = userClient.Register(ctx, req)
+// 传递 关注操作 的上下文, 并获取 RPC Server 端的响应.
+func RelationAction(ctx context.Context, req *relation.DouyinRelationActionRequest) (resp *relation.DouyinRelationActionResponse, err error) {
+	resp, err = relationClient.RelationAction(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
 
-func Login(ctx context.Context, req *user.DouyinUserRegisterRequest) (resp *user.DouyinUserRegisterResponse, err error) {
-	resp, err = userClient.Login(ctx, req)
+// 传递 获取正在关注列表操作 的上下文, 并获取 RPC Server 端的响应.
+func RelationFollowList(ctx context.Context, req *relation.DouyinRelationFollowListRequest) (resp *relation.DouyinRelationFollowListResponse, err error) {
+	resp, err = relationClient.RelationFollowList(ctx, req)
 	if err != nil {
 		return nil, err
 	}
+
 	return resp, nil
 }
 
-func GetUserById(ctx context.Context, req *user.DouyinUserRequest) (resp *user.DouyinUserResponse, err error) {
-	resp, err = userClient.GetUserById(ctx, req)
+// 传递 获取粉丝列表操作 的上下文, 并获取 RPC Server 端的响应.
+func RelationFollowerList(ctx context.Context, req *relation.DouyinRelationFollowerListRequest) (resp *relation.DouyinRelationFollowerListResponse, err error) {
+	resp, err = relationClient.RelationFollowerList(ctx, req)
 	if err != nil {
 		return nil, err
 	}
