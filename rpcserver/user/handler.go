@@ -169,17 +169,16 @@ func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserReque
 	// true means the claim.id has follow the modelUser.id, false means not follow
 
 	isFollow := false
-	//TODO
-	/*
-		relation := new(db.Relation)
-		if err := db.DB.WithContext(ctx).First(&relation, "user_id = ? and to_user_id = ?", claim.Id, int64(u.Id)).Error; err != nil {
-			return nil, err
-		}
 
-		if relation != nil {
-			isFollow = true
-		}
-	*/
+	relation := new(db.Relation)
+	if err := db.DB.WithContext(ctx).First(&relation, "user_id = ? and to_user_id = ?", claim.Id, int64(u.Id)).Error; err != nil {
+		return nil, err
+	}
+
+	if relation != nil {
+		isFollow = true
+	}
+	
 	userInfo := &user.User{
 		Id:            int64(u.Id),
 		Name:          u.Name,
@@ -214,9 +213,9 @@ func (s *UserSrvImpl) Start() {
 		server.WithMetaHandler(transmeta.ServerTTHeaderHandler), //support kerrors
 		//server.WithMiddleware(middleware.CommonMiddleware),                 // middleware
 		//server.WithMiddleware(middleware.ServerMiddleware),                 // middleware
-		server.WithRegistry(r), // registry
+		server.WithRegistry(r),                                             // registry
 		server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}), // limit
-		server.WithMuxTransport(), // Multiplex
+		server.WithMuxTransport(),                                          // Multiplex
 		//server.WithSuite(tracing.NewServerSuite()),                         // trace
 		// Please keep the same as provider.WithServiceName
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: "userRegisterLoginGetInfo"}),
