@@ -150,7 +150,7 @@ func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserReque
 	}
 
 	if req.UserId < 0 {
-		return nil, err
+		return nil, kerrors.NewBizStatusError(10007, "Invalid Username")
 	}
 
 	u := new(user.User)
@@ -169,16 +169,18 @@ func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserReque
 	// true means the claim.id has follow the modelUser.id, false means not follow
 
 	isFollow := false
-
-	relation := new(db.Relation)
-	if err := db.DB.WithContext(ctx).First(&relation, "user_id = ? and to_user_id = ?", claim.Id, int64(u.Id)).Error; err != nil {
-		return nil, err
-	}
-
-	if relation != nil {
+	if claim.Id == u.Id {
 		isFollow = true
+	} else {
+		relation := new(db.Relation)
+		if err := db.DB.WithContext(ctx).First(&relation, "user_id = ? and to_user_id = ?", claim.Id, u.Id).Error; err != nil {
+			return nil, err
+		}
+		if relation != nil {
+			isFollow = true
+		}
 	}
-	
+
 	userInfo := &user.User{
 		Id:            int64(u.Id),
 		Name:          u.Name,

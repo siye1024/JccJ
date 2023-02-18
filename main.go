@@ -4,6 +4,7 @@ import (
 	"dousheng/controller/xrpc"
 	"dousheng/db"
 	commentsrv "dousheng/rpcserver/comment"
+	favoritesrv "dousheng/rpcserver/favorite"
 	feedsrv "dousheng/rpcserver/feed"
 	publishsrv "dousheng/rpcserver/publish"
 	relationsrv "dousheng/rpcserver/relation"
@@ -18,7 +19,7 @@ import (
 func main() {
 
 	var wg sync.WaitGroup
-	wg.Add(6)
+	wg.Add(9)
 
 	go func() { // INIT HTTP
 		defer wg.Done()
@@ -61,11 +62,18 @@ func main() {
 		publishServer.Start()
 	}()
 
-	go func() { // INIT Comment RPC server
+	go func() { // INIT Relation RPC server
 		defer wg.Done()
 		var relationServer relationsrv.RelationSrvImpl
 		defer relationServer.Stop()
 		relationServer.Start()
+	}()
+
+	go func() { // INIT Favorite RPC server
+		defer wg.Done()
+		var favoriteServer favoritesrv.FavoriteSrvImpl
+		defer favoriteServer.Stop()
+		favoriteServer.Start()
 	}()
 
 	go func() { // INIT All RPC client
