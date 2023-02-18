@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"dousheng/controller/xhttp"
+	"dousheng/db"
 	"dousheng/pkg/minio"
+	"dousheng/pkg/pack"
 	publish "dousheng/rpcserver/kitex_gen/publish"
 	publishsrv "dousheng/rpcserver/kitex_gen/publish/publishsrv"
 	"github.com/cloudwego/kitex/pkg/kerrors"
@@ -16,6 +18,7 @@ import (
 	etcd "github.com/kitex-contrib/registry-etcd"
 	"log"
 	"net"
+	"strings"
 )
 
 // PublishSrvImpl implements the last service interface defined in the IDL.
@@ -31,28 +34,105 @@ func (s *PublishSrvImpl) PublishAction(ctx context.Context, req *publish.DouyinP
 	if len(req.Data) == 0 || len(req.Title) == 0 {
 		return nil, kerrors.NewBizStatusError(20001, "Empty Video Data or Empty Title")
 	}
-
-	MinioVideoBucketName := xminio.bucketName
+	//process video
+	MinioVideoBucketName := xminio.BucketName
 	videoData := []byte(req.Data)
 
-	reader := bytes.NewReader(videoData)
+	videoReader := bytes.NewReader(videoData)
 	u2, err := uuid.NewV4()
 	if err != nil {
 		return nil, err
 	}
 	fileName := u2.String() + ".mp4" // assign video name across uuid
-	err = xminio.UploadFile(MinioVideoBucketName, fileName, reader, int64(len(videoData)))
+	// upload video
+	err = xminio.UploadFile(MinioVideoBucketName, fileName, videoReader, int64(len(videoData)))
+	if err != nil {
+		return nil, err
+	}
+	// get video url
+	url, err := xminio.GetFileUrl(MinioVideoBucketName, fileName, 0) // 0 is the default expiry time (1 day)
+	if err != nil {
+		return nil, err
+	}
+	playUrl := strings.Split(url.String(), "?")[0]
+	if err != nil {
+		return nil, err
+	}
+	//process video cover
+	u3, err := uuid.NewV4()
+	if err != nil {
+		return nil, err
+	}
+	coverName := u3.String() + ".jpg"
+	coverData, err := xminio.ReadFrameAsJpeg(playUrl)
+	if err != nil {
+		return nil, err
+	}
+	//upload video cover
+	coverReader := bytes.NewReader(coverData)
+	err = xminio.UploadFile(MinioVideoBucketName, coverName, coverReader, int64(len(coverData)))
+	if err != nil {
+		return nil, err
+	}
+	//get video cover url
+	coverUrl, err := xminio.GetFileUrl(MinioVideoBucketName, coverName, 0)
 	if err != nil {
 		return nil, err
 	}
 
-	return
+	CoverUrl := strings.Split(coverUrl.String(), "?")[0]
+	// 封装video
+	videoModel := &db.Video{
+		AuthorID:      int(claim.Id),
+		PlayUrl:       playUrl,
+		CoverUrl:      CoverUrl,
+		FavoriteCount: 0,
+		CommentCount:  0,
+		Title:         req.Title,
+	}
+	err = db.CreateVideo(ctx, videoModel)
+	if err != nil {
+		return nil, err
+	}
+
+	respMsg := "Publish Video Success"
+	resp = &publish.DouyinPublishActionResponse{
+		StatusCode: 0,
+		StatusMsg:  &respMsg,
+	}
+	return resp, nil
 }
 
 // PublishList implements the PublishSrvImpl interface.
 func (s *PublishSrvImpl) PublishList(ctx context.Context, req *publish.DouyinPublishListRequest) (resp *publish.DouyinPublishListResponse, err error) {
-	// TODO: Your code here...
-	return
+	claim, err := xhttp.Jwt.ParseToken(req.Token)
+	if err != nil {
+		return nil, nil
+	}
+
+	if req.UserId == 0 {
+		req.UserId = claim.Id // 没有传入UserID，默认为自己
+	}
+
+	videos, err := db.PublishList(ctx, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	video_list, err := pack.PackVideos(ctx, videos, &req.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	respMsg := "Get Publish List Success"
+	resp = &publish.DouyinPublishListResponse{
+		StatusCode: 0,
+		StatusMsg:  &respMsg,
+		VideoList:  video_list,
+	}
+
+	return resp, nil
+
 }
 
 func (s *PublishSrvImpl) Start() {

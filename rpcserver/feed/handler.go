@@ -71,7 +71,7 @@ func (s *FeedSrvImpl) GetUserFeed(ctx context.Context, req *feed.DouyinFeedReque
 
 // GetVideoById implements the FeedSrvImpl interface.
 func (s *FeedSrvImpl) GetVideoById(ctx context.Context, req *feed.VideoIdRequest) (resp *feed.Video, err error) {
-	// TODO: Your code here...
+
 	return nil, errors.New("Unsupport Service")
 }
 func (s *FeedSrvImpl) Start() {
