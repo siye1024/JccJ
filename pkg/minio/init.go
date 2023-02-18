@@ -9,11 +9,11 @@ import (
 
 var (
 	minioClient     *minio.Client
-	Endpoint        = "play.min.io"
-	AccessKeyID     = "Q3AM3UQ867SPQQA43P2F"
-	SecretAccessKey = "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
-	UseSSL          = true
-	BucketName      = "dousheng_JccJ"
+	Endpoint        = "localhost:9000"
+	AccessKeyID     = "doushengMinio"
+	SecretAccessKey = "doushengMinio"
+	UseSSL          = false
+	BucketName      = "doushengjccj"
 	Location        = "chengdu"
 )
 
