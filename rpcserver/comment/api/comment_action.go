@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 	"dousheng/db"
-	"dousheng/rpcserver/comment/kitex_gen/comment"
+	"dousheng/rpcserver/kitex_gen/comment"
 	"github.com/cloudwego/kitex/pkg/kerrors"
 )
 

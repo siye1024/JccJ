@@ -2,19 +2,14 @@ package commentsrv
 
 import (
 	"context"
-<<<<<<< Updated upstream
-	comment "dousheng/rpcserver/kitex_gen/comment"
-	commentsrv "dousheng/rpcserver/kitex_gen/comment/commentsrv"
-=======
 	"dousheng/controller/xhttp"
 	"dousheng/controller/xrpc"
 	"dousheng/rpcserver/comment/api"
-
-	comment "dousheng/rpcserver/comment/kitex_gen/comment"
-	commentsrv "dousheng/rpcserver/comment/kitex_gen/comment/commentsrv"
-	"dousheng/rpcserver/user/kitex_gen/user"
+	comment "dousheng/rpcserver/kitex_gen/comment"
+	commentsrv "dousheng/rpcserver/kitex_gen/comment/commentsrv"
+	"dousheng/rpcserver/kitex_gen/user"
+	"fmt"
 	"github.com/cloudwego/kitex/pkg/kerrors"
->>>>>>> Stashed changes
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/pkg/transmeta"
@@ -22,6 +17,7 @@ import (
 	etcd "github.com/kitex-contrib/registry-etcd"
 	"log"
 	"net"
+	"time"
 )
 
 // CommentSrvImpl implements the last service interface defined in the IDL.
@@ -53,30 +49,56 @@ func (s *CommentSrvImpl) CommentAction(ctx context.Context, req *comment.DouyinC
 	}
 
 	userinfo, err := xrpc.GetUserById(ctx, &user.DouyinUserRequest{
-		UserId: req.UserId ,
+		UserId: req.UserId,
 		Token:  req.Token,
 	})
+	t := time.Now()
+	tFormat := fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day())
 
-	//commentInfo := comment.Comment{
-	//	Id:  int64(req.VideoId),
-	//	User: userinfo.User,
-	//	Content: *req.CommentText,
-	//	CreateDate: ,
-	//}
+	commentInfo := comment.Comment{
+		Id:         int64(req.VideoId),
+		User:       userinfo.User,
+		Content:    *req.CommentText,
+		CreateDate: tFormat,
+	}
 
 	resp = &comment.DouyinCommentActionResponse{
 		StatusCode: 0,
-		StatusMsg: &respStatusMsg,
-		Comment: &commentInfo,
+		StatusMsg:  &respStatusMsg,
+		Comment:    &commentInfo,
 	}
 	return resp, nil
 }
 
 // CommentList implements the CommentSrvImpl interface.
 func (s *CommentSrvImpl) CommentList(ctx context.Context, req *comment.DouyinCommentListRequest) (resp *comment.DouyinCommentListResponse, err error) {
-	// TODO: Your code here...
-	return
+	var (
+		respStatusMsg = "Get User's Comment List Successfully"
+	)
+
+	claim, err := xhttp.Jwt.ParseToken(req.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.VideoId == 0 || claim.Id == 0 {
+		err := kerrors.NewBizStatusError(30010, "Error occurred while binding the request body to the struct")
+		return nil, err
+	}
+
+	comments, err := api.NewCommentListService(ctx).CommentList(req, claim.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = &comment.DouyinCommentListResponse{
+		StatusCode:  0,
+		StatusMsg:   &respStatusMsg,
+		CommentList: comments,
+	}
+	return resp, nil
 }
+
 func (s *CommentSrvImpl) Start() {
 	r, err := etcd.NewEtcdRegistry([]string{"127.0.0.1:2379"})
 	if err != nil {

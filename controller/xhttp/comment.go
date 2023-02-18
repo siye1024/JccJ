@@ -18,13 +18,19 @@ package xhttp
 import (
 	"dousheng/controller/xrpc"
 	"dousheng/rpcserver/kitex_gen/comment"
+	"github.com/cloudwego/kitex/pkg/kerrors"
 	"github.com/gin-gonic/gin"
+	"log"
 	"strconv"
 )
 
 // CommentAction deliver the context of the comment Op to the client of the RPC, and get the response
 func CommentAction(c *gin.Context) {
-	var param CommentActionParam
+	var (
+		param          CommentActionParam
+		respStatusCode int
+		respStatusMsg  string
+	)
 	token := c.Query("token")
 	video_id := c.Query("video_id")
 	action_type := c.Query("action_type")
@@ -74,18 +80,34 @@ func CommentAction(c *gin.Context) {
 	}
 
 	resp, err := xrpc.CommentAction(c, &rpcReq)
-	if err != nil {
+	bizErr, isBizErr := kerrors.FromBizStatusError(err)
+	if isBizErr == true || err != nil {
+		if isBizErr == false { // if it is not business error
+			respStatusCode = -1
+			respStatusMsg = "Service Process Error"
+			log.Println(err.Error())
+		} else { // business err
+			respStatusCode = int(bizErr.BizStatusCode())
+			respStatusMsg = bizErr.BizMessage()
+		}
 		SendResponse(c, gin.H{
-			"status_code": 30004,
-			"status_msg":  "Comment Error",
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
 		})
+
+		return
 	}
+
 	SendResponse(c, resp)
 }
 
 // CommentList deliver the context of the "get comments" Op to the client of the RPC, and get the response
 func CommentList(c *gin.Context) {
-	var param CommentListParam
+	var (
+		param          CommentListParam
+		respStatusCode int
+		respStatusMsg  string
+	)
 	videoid, err := strconv.Atoi(c.Query("video_id"))
 	if err != nil {
 		SendResponse(c, gin.H{
@@ -109,12 +131,23 @@ func CommentList(c *gin.Context) {
 		VideoId: param.VideoId,
 		Token:   param.Token,
 	})
-	if err != nil {
+	bizErr, isBizErr := kerrors.FromBizStatusError(err)
+	if isBizErr == true || err != nil {
+		if isBizErr == false { // if it is not business error
+			respStatusCode = -1
+			respStatusMsg = "Service Process Error"
+			log.Println(err.Error())
+		} else { // business err
+			respStatusCode = int(bizErr.BizStatusCode())
+			respStatusMsg = bizErr.BizMessage()
+		}
 		SendResponse(c, gin.H{
-			"status_code": 30006,
-			"status_msg":  "Get the Comment List Error",
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
 		})
+
 		return
 	}
+
 	SendResponse(c, resp)
 }
