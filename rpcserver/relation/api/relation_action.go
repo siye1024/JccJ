@@ -27,6 +27,5 @@ func (s *RelationActionOp) RelationAction(req *relation.DouyinRelationActionRequ
 		return db.DisRelation(s.ctx, req.UserId, req.ToUserId)
 	}
 
-	err := kerrors.NewBizStatusError(40005, "Error occurred while binding the request body to the struct")
-	return err
+	return kerrors.NewBizStatusError(40004, "Error Action Type")
 }

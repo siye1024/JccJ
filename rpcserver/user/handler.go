@@ -52,18 +52,12 @@ func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegister
 
 	err = api2.NewCreateUserOp(ctx).CreateUser(req, Arg2Config)
 	if err != nil {
-		//err := kerrors.NewBizStatusError(10013, "Register Failed")
 		return nil, err
 	}
 
 	//Auto Login
 	uid, err := api2.NewCheckUserOp(ctx).CheckUser(req)
 	if err != nil {
-		//resp = &user.DouyinUserRegisterResponse{
-		//	StatusCode: 10012,
-		//	StatusMsg:  &respErrorMag,
-		//}
-		//return resp, nil
 		return nil, err
 	}
 
@@ -72,10 +66,6 @@ func (s *UserSrvImpl) Register(ctx context.Context, req *user.DouyinUserRegister
 		Time: time.Now().Unix(),
 	})
 	if err != nil {
-		//resp = &user.DouyinUserRegisterResponse{
-		//	StatusCode: 10012,
-		//	StatusMsg:  &respErrorMag,
-		//}
 		return nil, err
 	}
 
@@ -158,7 +148,7 @@ func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserReque
 		return nil, err
 	}
 
-	if u == nil {
+	if u == nil || u.Id == 0 {
 		err := kerrors.NewBizStatusError(10009, "User Already Withdraw")
 		return nil, err
 	}
@@ -170,7 +160,7 @@ func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserReque
 
 	isFollow := false
 	if claim.Id == u.Id {
-		isFollow = true
+		isFollow = false
 	} else {
 		relation := new(db.Relation)
 		if err := db.DB.WithContext(ctx).First(&relation, "user_id = ? and to_user_id = ?", claim.Id, u.Id).Error; err != nil {
@@ -187,12 +177,6 @@ func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserReque
 		FollowCount:   &follow_count,
 		FollowerCount: &follower_count,
 		IsFollow:      isFollow,
-	}
-
-	if claim.Id == req.UserId {
-		userInfo.IsFollow = true
-	} else {
-		userInfo.IsFollow = false
 	}
 
 	resp = &user.DouyinUserResponse{
@@ -215,9 +199,9 @@ func (s *UserSrvImpl) Start() {
 		server.WithMetaHandler(transmeta.ServerTTHeaderHandler), //support kerrors
 		//server.WithMiddleware(middleware.CommonMiddleware),                 // middleware
 		//server.WithMiddleware(middleware.ServerMiddleware),                 // middleware
-		server.WithRegistry(r),                                             // registry
+		server.WithRegistry(r), // registry
 		server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}), // limit
-		server.WithMuxTransport(),                                          // Multiplex
+		server.WithMuxTransport(), // Multiplex
 		//server.WithSuite(tracing.NewServerSuite()),                         // trace
 		// Please keep the same as provider.WithServiceName
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: "userRegisterLoginGetInfo"}),

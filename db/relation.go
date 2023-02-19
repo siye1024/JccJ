@@ -10,10 +10,10 @@ import (
 // Relation 既属于 关注者 也属于 被关注者
 type Relation struct {
 	gorm.Model
-	User     User `gorm:"foreignkey:UserID;"`
-	UserID   int64  `gorm:"index:idx_userid,unique;not null"`
-	ToUser   User `gorm:"foreignkey:ToUserID;"`
-	ToUserID int64  `gorm:"index:idx_userid,unique;index:idx_userid_to;not null"`
+	User     User  `gorm:"foreignkey:UserID;"`
+	UserID   int64 `gorm:"index:idx_userid,unique;not null"`
+	ToUser   User  `gorm:"foreignkey:ToUserID;"`
+	ToUserID int64 `gorm:"index:idx_userid,unique;index:idx_userid_to;not null"`
 }
 
 func (Relation) TableName() string {
@@ -40,8 +40,8 @@ func NewRelation(ctx context.Context, uid int64, tid int64) error {
 			return err
 		}
 
-		// 2.改变 user 表中的 following count
-		res := tx.Model(new(User)).Where("ID = ?", uid).Update("following_count", gorm.Expr("following_count + ?", 1))
+		// 2.改变 user 表中的 follow count
+		res := tx.Model(new(User)).Where("ID = ?", uid).Update("follow_count", gorm.Expr("follow_count + ?", 1))
 		if res.Error != nil {
 			return res.Error
 		}
@@ -81,8 +81,8 @@ func DisRelation(ctx context.Context, uid int64, tid int64) error {
 		if err != nil {
 			return err
 		}
-		// 2.改变 user 表中的 following count
-		res := tx.Model(new(User)).Where("ID = ?", uid).Update("following_count", gorm.Expr("following_count - ?", 1))
+		// 2.改变 user 表中的 follow count
+		res := tx.Model(new(User)).Where("ID = ?", uid).Update("follow_count", gorm.Expr("follow_count - ?", 1))
 		if res.Error != nil {
 			return res.Error
 		}
