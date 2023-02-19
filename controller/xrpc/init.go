@@ -11,4 +11,6 @@ func InitRpcClient() {
 
 	initRelationRpc()
 
+	initFavoriteRpc()
+
 }

@@ -33,8 +33,8 @@ func Register(c *gin.Context) {
 	//client request metric
 	var (
 		registerMsg    UserRegisterParam
-		respStatusCode int
-		respStatusMsg  string
+		respStatusCode int    = -1
+		respStatusMsg  string = "Service Process Error"
 	)
 	registerMsg.UserName = c.Query("username")
 	registerMsg.PassWord = c.Query("password")
@@ -62,7 +62,7 @@ func Register(c *gin.Context) {
 	})
 	bizErr, isBizErr := kerrors.FromBizStatusError(err)
 	if isBizErr == true || err != nil {
-		if isBizErr == false { // if it is not business error
+		if isBizErr == false { // if it is not business error, return -1 default error
 			respStatusCode = -1
 			respStatusMsg = "Service Process Error"
 			log.Println(err.Error())
@@ -98,7 +98,7 @@ func Login(c *gin.Context) {
 		})
 		return
 	}
-	// len of the username or password exceed the 32 bit
+	// len of the username or password exceed the 32
 	if len(logMsg.UserName) > 32 || len(logMsg.PassWord) > 32 {
 		SendResponse(c, gin.H{
 			"status_code": 10014,
@@ -113,7 +113,7 @@ func Login(c *gin.Context) {
 	})
 	bizErr, isBizErr := kerrors.FromBizStatusError(err)
 	if isBizErr == true || err != nil {
-		if isBizErr == false { // if it is not business error
+		if isBizErr == false { //  if it is not business error, return -1 default error
 			respStatusCode = -1
 			respStatusMsg = "Service Process Error"
 			log.Println(err.Error())
@@ -166,7 +166,7 @@ func GetUserById(c *gin.Context) {
 	})
 	bizErr, isBizErr := kerrors.FromBizStatusError(err)
 	if isBizErr == true || err != nil {
-		if isBizErr == false { // if it is not business error
+		if isBizErr == false { //  if it is not business error, return -1 default error
 			respStatusCode = -1
 			respStatusMsg = "Service Process Error"
 			log.Println(err.Error())

@@ -26,16 +26,17 @@ func (s *FavoriteSrvImpl) FavoriteAction(ctx context.Context, req *favorite.Douy
 	)
 	claim, err := xhttp.Jwt.ParseToken(req.Token)
 	if err != nil {
-		err := kerrors.NewBizStatusError(70004, "Invalid Token")
 		return nil, err
 	}
 
-	if req.UserId == 0 || claim.Id != 0 {
+	if claim.Id > 0 {
 		req.UserId = claim.Id
+	} else {
+		return nil, kerrors.NewBizStatusError(70003, "Invalid Token or User ID")
 	}
 
-	if req.ActionType != 1 && req.ActionType != 2 || req.UserId == 0 || req.VideoId == 0 {
-		err := kerrors.NewBizStatusError(70005, "Error occurred while binding the request body to the struct")
+	if req.ActionType != 1 && req.ActionType != 2 || req.UserId <= 0 || req.VideoId <= 0 {
+		err := kerrors.NewBizStatusError(70005, "Invalid Request")
 		return nil, err
 	}
 
@@ -58,11 +59,10 @@ func (s *FavoriteSrvImpl) FavoriteList(ctx context.Context, req *favorite.Douyin
 	)
 	claim, err := xhttp.Jwt.ParseToken(req.Token)
 	if err != nil {
-		err := kerrors.NewBizStatusError(70004, "Invalid Token")
 		return nil, err
 	}
 
-	if req.UserId == 0 || claim.Id == 0 {
+	if req.UserId <= 0 || claim.Id <= 0 || req.UserId != claim.Id {
 		err := kerrors.NewBizStatusError(70003, "Invalid Token or User ID")
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (s *FavoriteSrvImpl) Start() {
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: "favoriteService"}),
 	)
 
-	log.Println("Start User RPC service...")
+	log.Println("Start Favorite RPC service...")
 	err = svr.Run()
 	if err != nil {
 		log.Panic(err.Error())
@@ -104,5 +104,5 @@ func (s *FavoriteSrvImpl) Start() {
 
 }
 func (s *FavoriteSrvImpl) Stop() {
-	log.Println("Stop User RPC service...")
+	log.Println("Stop Favorite  RPC service...")
 }
