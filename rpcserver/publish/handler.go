@@ -90,7 +90,7 @@ func (s *PublishSrvImpl) PublishAction(ctx context.Context, req *publish.DouyinP
 	CoverUrl := strings.Split(coverUrl.String(), "?")[0]
 	// 封装video
 	videoModel := &db.Video{
-		AuthorID:      int(claim.Id),
+		AuthorID:      claim.Id,
 		PlayUrl:       playUrl,
 		CoverUrl:      CoverUrl,
 		FavoriteCount: 0,

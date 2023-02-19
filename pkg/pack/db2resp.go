@@ -84,8 +84,8 @@ func User(ctx context.Context, u *db.User, fromID int64) (*user.User, error) {
 		}, nil
 	}
 
-	follow_count := int64(u.FollowCount)
-	follower_count := int64(u.FollowerCount)
+	follow_count := u.FollowCount
+	follower_count := u.FollowerCount
 
 	// true means fromID has followed u.ID
 	isFollow := false
@@ -114,12 +114,12 @@ func User(ctx context.Context, u *db.User, fromID int64) (*user.User, error) {
 func Comments(ctx context.Context, vs []*db.Comment, fromID int64) ([]*comment.Comment, error) {
 	comments := make([]*comment.Comment, 0)
 	for _, v := range vs {
-		user, err := db.GetUserByID(ctx, int64(v.UserID))
+		commentUser, err := db.GetUserByID(ctx, v.UserID)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
 
-		packUser, err := User(ctx, user, fromID)
+		packUser, err := User(ctx, commentUser, fromID)
 		if err != nil {
 			return nil, err
 		}

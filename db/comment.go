@@ -11,9 +11,9 @@ import (
 type Comment struct {
 	gorm.Model
 	Video   Video  `gorm:"foreignkey:VideoID"`
-	VideoID int    `gorm:"index:idx_videoid;not null"`
+	VideoID int64  `gorm:"index:idx_videoid;not null"`
 	User    User   `gorm:"foreignkey:UserID"`
-	UserID  int    `gorm:"index:idx_userid;not null"`
+	UserID  int64  `gorm:"index:idx_userid;not null"`
 	Content string `gorm:"type:varchar(255);not null"`
 }
 
@@ -83,7 +83,7 @@ func DelComment(ctx context.Context, commentID int64, vid int64) error {
 // GetVideoComments returns a list of video comments.
 func GetVideoComments(ctx context.Context, vid int64) ([]*Comment, error) {
 	var comments []*Comment
-	err := DB.WithContext(ctx).Model(&Comment{}).Where(&Comment{VideoID: int(vid)}).Find(&comments).Error
+	err := DB.WithContext(ctx).Model(&Comment{}).Where(&Comment{VideoID: vid}).Find(&comments).Error
 	if err != nil {
 		return nil, err
 	}
