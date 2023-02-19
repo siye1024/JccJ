@@ -11,9 +11,9 @@ import (
 type Relation struct {
 	gorm.Model
 	User     User `gorm:"foreignkey:UserID;"`
-	UserID   int  `gorm:"index:idx_userid,unique;not null"`
+	UserID   int64  `gorm:"index:idx_userid,unique;not null"`
 	ToUser   User `gorm:"foreignkey:ToUserID;"`
-	ToUserID int  `gorm:"index:idx_userid,unique;index:idx_userid_to;not null"`
+	ToUserID int64  `gorm:"index:idx_userid,unique;index:idx_userid_to;not null"`
 }
 
 func (Relation) TableName() string {
@@ -35,7 +35,7 @@ func NewRelation(ctx context.Context, uid int64, tid int64) error {
 	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 在事务中执行一些 db 操作（从这里开始，您应该使用 'tx' 而不是 'db'）
 		// 1. 新增关注数据
-		err := tx.Create(&Relation{UserID: int(uid), ToUserID: int(tid)}).Error
+		err := tx.Create(&Relation{UserID: uid, ToUserID: tid}).Error
 		if err != nil {
 			return err
 		}

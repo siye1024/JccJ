@@ -30,16 +30,17 @@ func (s *CommentSrvImpl) CommentAction(ctx context.Context, req *comment.DouyinC
 	)
 	claim, err := xhttp.Jwt.ParseToken(req.Token)
 	if err != nil {
-		err := kerrors.NewBizStatusError(30007, "Get Token Error")
 		return nil, err
 	}
 
-	if req.UserId == 0 || claim.Id != 0 {
+	if claim.Id > 0 {
 		req.UserId = claim.Id
+	} else {
+		return nil, kerrors.NewBizStatusError(30003, "Invalid Token or User ID")
 	}
 
-	if req.ActionType != 1 && req.ActionType != 2 || req.UserId == 0 || req.VideoId == 0 {
-		err := kerrors.NewBizStatusError(30010, "Error occurred while binding the request body to the struct")
+	if req.ActionType != 1 && req.ActionType != 2 || req.UserId <= 0 || req.VideoId <= 0 {
+		err := kerrors.NewBizStatusError(30002, "Invalid Action")
 		return nil, err
 	}
 
@@ -56,7 +57,7 @@ func (s *CommentSrvImpl) CommentAction(ctx context.Context, req *comment.DouyinC
 	tFormat := fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day())
 
 	commentInfo := comment.Comment{
-		Id:         int64(req.VideoId),
+		Id:         int64(req.VideoId), //TODO: it should be comment id
 		User:       userinfo.User,
 		Content:    *req.CommentText,
 		CreateDate: tFormat,
@@ -73,20 +74,21 @@ func (s *CommentSrvImpl) CommentAction(ctx context.Context, req *comment.DouyinC
 // CommentList implements the CommentSrvImpl interface.
 func (s *CommentSrvImpl) CommentList(ctx context.Context, req *comment.DouyinCommentListRequest) (resp *comment.DouyinCommentListResponse, err error) {
 	var (
-		respStatusMsg = "Get User's Comment List Successfully"
+		respStatusMsg = "Get Video's Comment List Successfully"
+		user_id       int64
 	)
 
-	claim, err := xhttp.Jwt.ParseToken(req.Token)
-	if err != nil {
-		return nil, err
+	if len(req.Token) == 0 { // tourist can read comments
+		user_id = 0
+	} else {
+		claim, err := xhttp.Jwt.ParseToken(req.Token)
+		if err != nil {
+			return nil, err
+		}
+		user_id = claim.Id
 	}
 
-	if req.VideoId == 0 || claim.Id == 0 {
-		err := kerrors.NewBizStatusError(30010, "Error occurred while binding the request body to the struct")
-		return nil, err
-	}
-
-	comments, err := api.NewCommentListService(ctx).CommentList(req, claim.Id)
+	comments, err := api.NewCommentListService(ctx).CommentList(req, user_id)
 	if err != nil {
 		return nil, err
 	}

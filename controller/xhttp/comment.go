@@ -2,16 +2,20 @@
 	resp.StatusCode		resp.StatusMsg
 
 - 	0					success
--	30001				Error Video ID
--	30002				Error Action Type
--	30003				Error Comment ID
+-	30001				PLease Log In First!
+-	30002				Invalid Action
+-	30003				Invalid Token or User ID
+-	30005				Invalid Video
+-	30009				Database Error
+
 -	30004				Comment Error
--	30005				Error Token or VideoID
+
 -	30006				Get the Comment List Error
 -	30007				Get Token Error
 -	30008				Comment Operation Error
--	30009				Database Error
+
 -	30010				Error occurred while binding the request body to the struct
+- 	-1					Comment Service Error
 */
 package xhttp
 
@@ -28,26 +32,36 @@ import (
 func CommentAction(c *gin.Context) {
 	var (
 		param          CommentActionParam
-		respStatusCode int
-		respStatusMsg  string
+		respStatusCode = -1
+		respStatusMsg  = "Comment Service Error"
 	)
 	token := c.Query("token")
 	video_id := c.Query("video_id")
 	action_type := c.Query("action_type")
 
+	if len(token) == 0 {
+		respStatusCode = 30001
+		respStatusMsg = "PLease Log In First!"
+		SendResponse(c, gin.H{
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
+		})
+		return
+	}
+
 	vid, err := strconv.Atoi(video_id)
 	if err != nil {
 		SendResponse(c, gin.H{
-			"status_code": 30001,
-			"status_msg":  "Error Video ID",
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
 		})
 		return
 	}
 	action, err := strconv.Atoi(action_type)
 	if err != nil {
 		SendResponse(c, gin.H{
-			"status_code": 30002,
-			"status_msg":  "Error Action Type",
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
 		})
 		return
 	}
@@ -65,26 +79,30 @@ func CommentAction(c *gin.Context) {
 	if action == 1 {
 		comment_text := c.Query("comment_text")
 		rpcReq.CommentText = &comment_text
-	} else {
+	} else if action == 2 {
 		comment_id := c.Query("comment_id")
 		com_id, err := strconv.Atoi(comment_id)
 		if err != nil {
 			SendResponse(c, gin.H{
-				"status_code": 30003,
-				"status_msg":  "Error Comment ID",
+				"status_code": respStatusCode,
+				"status_msg":  respStatusMsg,
 			})
 			return
 		}
 		com_id64 := int64(com_id)
 		rpcReq.CommentId = &com_id64
+	} else {
+		SendResponse(c, gin.H{
+			"status_code": 30002,
+			"status_msg":  "Invalid Action",
+		})
+		return
 	}
 
 	resp, err := xrpc.CommentAction(c, &rpcReq)
 	bizErr, isBizErr := kerrors.FromBizStatusError(err)
 	if isBizErr == true || err != nil {
-		if isBizErr == false { // if it is not business error
-			respStatusCode = -1
-			respStatusMsg = "Service Process Error"
+		if isBizErr == false { // if it is not business error, return -1 default error
 			log.Println(err.Error())
 		} else { // business err
 			respStatusCode = int(bizErr.BizStatusCode())
@@ -105,24 +123,24 @@ func CommentAction(c *gin.Context) {
 func CommentList(c *gin.Context) {
 	var (
 		param          CommentListParam
-		respStatusCode int
-		respStatusMsg  string
+		respStatusCode = -1
+		respStatusMsg  = "Comment Service Error"
 	)
 	videoid, err := strconv.Atoi(c.Query("video_id"))
 	if err != nil {
 		SendResponse(c, gin.H{
-			"status_code": 30001,
-			"status_msg":  "Error Video ID",
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
 		})
 		return
 	}
 	param.VideoId = int64(videoid)
 	param.Token = c.Query("token")
 
-	if len(param.Token) == 0 || param.VideoId < 0 {
+	if param.VideoId <= 0 {
 		SendResponse(c, gin.H{
 			"status_code": 30005,
-			"status_msg":  "Error Token or VideoID",
+			"status_msg":  "Invalid Video",
 		})
 		return
 	}
@@ -133,9 +151,7 @@ func CommentList(c *gin.Context) {
 	})
 	bizErr, isBizErr := kerrors.FromBizStatusError(err)
 	if isBizErr == true || err != nil {
-		if isBizErr == false { // if it is not business error
-			respStatusCode = -1
-			respStatusMsg = "Service Process Error"
+		if isBizErr == false { // if it is not business error, return -1 default error
 			log.Println(err.Error())
 		} else { // business err
 			respStatusCode = int(bizErr.BizStatusCode())

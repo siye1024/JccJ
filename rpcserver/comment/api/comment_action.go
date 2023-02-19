@@ -21,8 +21,8 @@ func (s *CommentActionService) CommentAction(req *comment.DouyinCommentActionReq
 	// 1-评论
 	if req.ActionType == 1 {
 		return db.NewComment(s.ctx, &db.Comment{
-			UserID:  int(req.UserId),
-			VideoID: int(req.VideoId),
+			UserID:  req.UserId,
+			VideoID: req.VideoId,
 			Content: *req.CommentText,
 		})
 	}
@@ -31,6 +31,5 @@ func (s *CommentActionService) CommentAction(req *comment.DouyinCommentActionReq
 		return db.DelComment(s.ctx, *req.CommentId, req.VideoId)
 	}
 
-	err := kerrors.NewBizStatusError(30010, "Error occurred while binding the request body to the struct")
-	return err
+	return kerrors.NewBizStatusError(30002, "Invalid Action")
 }
