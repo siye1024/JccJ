@@ -26,16 +26,17 @@ func (s *RelationSrvImpl) RelationAction(ctx context.Context, req *relation.Douy
 	)
 	claim, err := xhttp.Jwt.ParseToken(req.Token)
 	if err != nil {
-		err := kerrors.NewBizStatusError(40004, "Invalid Token")
 		return nil, err
 	}
 
-	if req.UserId == 0 || claim.Id != 0 {
+	if claim.Id > 0 {
 		req.UserId = claim.Id
+	} else {
+		return nil, kerrors.NewBizStatusError(40003, "Invalid Token or User ID")
 	}
 
 	if req.ActionType < 1 || req.ActionType > 2 {
-		err := kerrors.NewBizStatusError(40005, "Error occurred while binding the request body to the struct")
+		err := kerrors.NewBizStatusError(40004, "Invalid Action Type")
 		return nil, err
 	}
 	// TODO Here
@@ -54,19 +55,27 @@ func (s *RelationSrvImpl) RelationAction(ctx context.Context, req *relation.Douy
 // RelationFollowList implements the RelationSrvImpl interface.
 func (s *RelationSrvImpl) RelationFollowList(ctx context.Context, req *relation.DouyinRelationFollowListRequest) (resp *relation.DouyinRelationFollowListResponse, err error) {
 	var (
-		respStatusMsg = "User Relation of FollowList Operate Successfully"
+		respStatusMsg = "Get Follow List Successfully"
+		user_id       int64
 	)
-	claim, err := xhttp.Jwt.ParseToken(req.Token)
-	if err != nil {
-		err := kerrors.NewBizStatusError(40004, "Invalid Token")
-		return nil, err
+	if len(req.Token) == 0 { // tourist can read follow list
+		user_id = 0
+	} else {
+		claim, err := xhttp.Jwt.ParseToken(req.Token)
+		if err != nil {
+			return nil, err
+		}
+		user_id = claim.Id
 	}
 
-	if req.UserId == 0 || claim.Id != 0 {
-		req.UserId = claim.Id // 没有传入UserID，默认为自己
+	if req.UserId == 0 {
+		req.UserId = user_id
+	}
+	if req.UserId == 0 && user_id == 0 {
+		return nil, kerrors.NewBizStatusError(40004, "Invalid Action Type")
 	}
 
-	users, err := api.NewFollowingListOp(ctx).FollowingList(req, claim.Id)
+	users, err := api.NewFollowingListOp(ctx).FollowingList(req, user_id)
 	if err != nil {
 		return nil, err
 	}
@@ -83,19 +92,27 @@ func (s *RelationSrvImpl) RelationFollowList(ctx context.Context, req *relation.
 // RelationFollowerList implements the RelationSrvImpl interface.
 func (s *RelationSrvImpl) RelationFollowerList(ctx context.Context, req *relation.DouyinRelationFollowerListRequest) (resp *relation.DouyinRelationFollowerListResponse, err error) {
 	var (
-		respStatusMsg = "User Relation of FollowerList Operate Successfully"
+		respStatusMsg = "Get Follower List Successfully"
+		user_id       int64
 	)
-	claim, err := xhttp.Jwt.ParseToken(req.Token)
-	if err != nil {
-		err := kerrors.NewBizStatusError(40004, "Invalid Token")
-		return nil, err
+	if len(req.Token) == 0 { // tourist can read follow list
+		user_id = 0
+	} else {
+		claim, err := xhttp.Jwt.ParseToken(req.Token)
+		if err != nil {
+			return nil, err
+		}
+		user_id = claim.Id
 	}
 
 	if req.UserId == 0 {
-		req.UserId = claim.Id // 没有传入UserID，默认为自己
+		req.UserId = user_id
+	}
+	if req.UserId == 0 && user_id == 0 {
+		return nil, kerrors.NewBizStatusError(40004, "Invalid Action Type")
 	}
 
-	users, err := api.NewFollowerListOp(ctx).FollowerList(req, claim.Id)
+	users, err := api.NewFollowerListOp(ctx).FollowerList(req, user_id)
 	if err != nil {
 		return nil, err
 	}
@@ -120,9 +137,9 @@ func (s *RelationSrvImpl) Start() {
 		server.WithMetaHandler(transmeta.ServerTTHeaderHandler), //support kerrors
 		//server.WithMiddleware(middleware.CommonMiddleware),                 // middleware
 		//server.WithMiddleware(middleware.ServerMiddleware),                 // middleware
-		server.WithRegistry(r),                                             // registry
+		server.WithRegistry(r), // registry
 		server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}), // limit
-		server.WithMuxTransport(),                                          // Multiplex
+		server.WithMuxTransport(), // Multiplex
 		//server.WithSuite(tracing.NewServerSuite()),                         // trace
 		// Please keep the same as provider.WithServiceName
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: "relationService"}),

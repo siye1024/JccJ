@@ -46,5 +46,5 @@ func (s *FollowerListOp) FollowerList(req *relation.DouyinRelationFollowerListRe
 		return nil, err
 	}
 
-	return pack.PackFollowerList(s.ctx, FollowerUser, fromID)
+	return pack.FollowerList(s.ctx, FollowerUser, fromID)
 }

@@ -2,12 +2,12 @@
 	resp.StatusCode		resp.StatusMsg
 
 - 	0					success
--	40001				Error UserID
--	40002				Error Action Type
+-	40001				PLease Log In First!
+-	40002				Invalid To_UserId
 -	40003				Error Token or UserID
--	40004				Invalid Token
--	40005				Error occurred while binding the request body to the struct
+-	40004				Invalid Action Type
 -	40006				Database Error
+-	-1					Default Error
 */
 
 package xhttp
@@ -25,18 +25,35 @@ import (
 func RelationAction(c *gin.Context) {
 	var (
 		param          RelationActionParam
-		respStatusCode int
-		respStatusMsg  string
+		respStatusCode = -1
+		respStatusMsg  = "Relation Action Error"
 	)
 	token := c.Query("token")
 	to_user_id := c.Query("to_user_id")
 	action_type := c.Query("action_type")
 
+	if len(token) == 0 {
+		respStatusCode = 40001
+		respStatusMsg = "PLease Log In First!"
+		SendResponse(c, gin.H{
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
+		})
+		return
+	}
+
 	tid, err := strconv.Atoi(to_user_id)
 	if err != nil {
 		SendResponse(c, gin.H{
-			"status_code": 40001,
-			"status_msg":  "Error UserID",
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
+		})
+		return
+	}
+	if tid <= 0 {
+		SendResponse(c, gin.H{
+			"status_code": 40002,
+			"status_msg":  "Invalid To_UserId",
 		})
 		return
 	}
@@ -44,8 +61,8 @@ func RelationAction(c *gin.Context) {
 	act, err := strconv.Atoi(action_type)
 	if err != nil {
 		SendResponse(c, gin.H{
-			"status_code": 40002,
-			"status_msg":  "Error Action Type",
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
 		})
 		return
 	}
@@ -63,9 +80,7 @@ func RelationAction(c *gin.Context) {
 	resp, err := xrpc.RelationAction(c, &rpcReq)
 	bizErr, isBizErr := kerrors.FromBizStatusError(err)
 	if isBizErr == true || err != nil {
-		if isBizErr == false { // if it is not business error
-			respStatusCode = -1
-			respStatusMsg = "Service Process Error"
+		if isBizErr == false { // if it is not business error, return -1 default error
 			log.Println(err.Error())
 		} else { // business err
 			respStatusCode = int(bizErr.BizStatusCode())
@@ -75,7 +90,6 @@ func RelationAction(c *gin.Context) {
 			"status_code": respStatusCode,
 			"status_msg":  respStatusMsg,
 		})
-
 		return
 	}
 
@@ -83,24 +97,24 @@ func RelationAction(c *gin.Context) {
 }
 
 // 传递 获取正在关注列表操作 的上下文至 Relation 服务的 RPC 客户端, 并获取相应的响应.
-func RelationFollowList(c *gin.Context) {
+func FollowList(c *gin.Context) {
 	var (
 		param          UserParam
-		respStatusCode int
-		respStatusMsg  string
+		respStatusCode = -1
+		respStatusMsg  = "Get Follow List Error"
 	)
 	uid, err := strconv.Atoi(c.Query("user_id"))
 	if err != nil {
 		SendResponse(c, gin.H{
-			"status_code": 40001,
-			"status_msg":  "Error UserID",
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
 		})
 		return
 	}
 	param.UserId = int64(uid)
 	param.Token = c.Query("token")
 
-	if len(param.Token) == 0 || param.UserId < 0 {
+	if param.UserId < 0 {
 		SendResponse(c, gin.H{
 			"status_code": 40003,
 			"status_msg":  "Error Token or UserID",
@@ -114,9 +128,7 @@ func RelationFollowList(c *gin.Context) {
 	})
 	bizErr, isBizErr := kerrors.FromBizStatusError(err)
 	if isBizErr == true || err != nil {
-		if isBizErr == false { // if it is not business error
-			respStatusCode = -1
-			respStatusMsg = "Service Process Error"
+		if isBizErr == false { // if it is not business error, return -1 default error
 			log.Println(err.Error())
 		} else { // business err
 			respStatusCode = int(bizErr.BizStatusCode())
@@ -134,24 +146,24 @@ func RelationFollowList(c *gin.Context) {
 }
 
 // 传递 获取粉丝列表操作 的上下文至 Relation 服务的 RPC 客户端, 并获取相应的响应.
-func RelationFollowerList(c *gin.Context) {
+func FollowerList(c *gin.Context) {
 	var (
 		param          UserParam
-		respStatusCode int
-		respStatusMsg  string
+		respStatusCode = -1
+		respStatusMsg  = "Get Follower List Error"
 	)
 	uid, err := strconv.Atoi(c.Query("user_id"))
 	if err != nil {
 		SendResponse(c, gin.H{
-			"status_code": 40001,
-			"status_msg":  "Error UserID",
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
 		})
 		return
 	}
 	param.UserId = int64(uid)
 	param.Token = c.Query("token")
 
-	if len(param.Token) == 0 || param.UserId < 0 {
+	if param.UserId < 0 {
 		SendResponse(c, gin.H{
 			"status_code": 40003,
 			"status_msg":  "Error Token or UserID",
@@ -165,9 +177,7 @@ func RelationFollowerList(c *gin.Context) {
 	})
 	bizErr, isBizErr := kerrors.FromBizStatusError(err)
 	if isBizErr == true || err != nil {
-		if isBizErr == false { // if it is not business error
-			respStatusCode = -1
-			respStatusMsg = "Service Process Error"
+		if isBizErr == false { // if it is not business error, return -1 default error
 			log.Println(err.Error())
 		} else { // business err
 			respStatusCode = int(bizErr.BizStatusCode())

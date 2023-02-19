@@ -34,7 +34,7 @@ func Register(c *gin.Context) {
 	var (
 		registerMsg    UserRegisterParam
 		respStatusCode int    = -1
-		respStatusMsg  string = "Service Process Error"
+		respStatusMsg  string = "Register Error"
 	)
 	registerMsg.UserName = c.Query("username")
 	registerMsg.PassWord = c.Query("password")
@@ -63,8 +63,7 @@ func Register(c *gin.Context) {
 	bizErr, isBizErr := kerrors.FromBizStatusError(err)
 	if isBizErr == true || err != nil {
 		if isBizErr == false { // if it is not business error, return -1 default error
-			respStatusCode = -1
-			respStatusMsg = "Service Process Error"
+
 			log.Println(err.Error())
 		} else { // business err
 			respStatusCode = int(bizErr.BizStatusCode())
@@ -85,8 +84,8 @@ func Login(c *gin.Context) {
 	//client login metric
 	var (
 		logMsg         UserRegisterParam
-		respStatusCode int
-		respStatusMsg  string
+		respStatusCode = -1
+		respStatusMsg  = "Login Error"
 	)
 	logMsg.UserName = c.Query("username")
 	logMsg.PassWord = c.Query("password")
@@ -114,8 +113,6 @@ func Login(c *gin.Context) {
 	bizErr, isBizErr := kerrors.FromBizStatusError(err)
 	if isBizErr == true || err != nil {
 		if isBizErr == false { //  if it is not business error, return -1 default error
-			respStatusCode = -1
-			respStatusMsg = "Service Process Error"
 			log.Println(err.Error())
 		} else { // business err
 			respStatusCode = int(bizErr.BizStatusCode())
@@ -132,25 +129,24 @@ func Login(c *gin.Context) {
 	SendResponse(c, resp) // service success
 }
 
-// Get User's ID OP
+// Get User Info By ID
 func GetUserById(c *gin.Context) {
 	//client request metric
 	var (
 		getUserByIdMsg UserParam
-		respStatusCode int
-		respStatusMsg  string
+		respStatusCode = -1
+		respStatusMsg  = "Get User Info Error"
 	)
 	userid, err := strconv.Atoi(c.Query("user_id"))
 	if err != nil {
 		SendResponse(c, gin.H{
-			"status_code": 10003,
-			"status_msg":  "That's not even a token",
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
 		})
 	}
 	getUserByIdMsg.UserId = int64(userid)
 	getUserByIdMsg.Token = c.Query("token")
 
-	// if username == empty or password == empty, Actually this case has been processed by dousheng client
 	if len(getUserByIdMsg.Token) == 0 || getUserByIdMsg.UserId < 0 {
 		SendResponse(c, gin.H{
 			"status_code": 10006,
@@ -167,8 +163,6 @@ func GetUserById(c *gin.Context) {
 	bizErr, isBizErr := kerrors.FromBizStatusError(err)
 	if isBizErr == true || err != nil {
 		if isBizErr == false { //  if it is not business error, return -1 default error
-			respStatusCode = -1
-			respStatusMsg = "Service Process Error"
 			log.Println(err.Error())
 		} else { // business err
 			respStatusCode = int(bizErr.BizStatusCode())

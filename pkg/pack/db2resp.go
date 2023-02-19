@@ -149,7 +149,7 @@ func FollowingList(ctx context.Context, vs []*db.Relation, fromID int64) ([]*use
 }
 
 // FollowerList pack lists of follower info.
-func PackFollowerList(ctx context.Context, vs []*db.Relation, fromID int64) ([]*user.User, error) {
+func FollowerList(ctx context.Context, vs []*db.Relation, fromID int64) ([]*user.User, error) {
 	users := make([]*db.User, 0)
 	for _, v := range vs {
 		user2, err := db.GetUserByID(ctx, int64(v.UserID))
