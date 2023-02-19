@@ -27,6 +27,6 @@ func (s *FavoriteActionOp) FavoriteAction(req *favorite.DouyinFavoriteActionRequ
 		return db.DisFavorite(s.ctx, req.UserId, req.VideoId)
 	}
 
-	err := kerrors.NewBizStatusError(70005, "Error occurred while binding the request body to the struct")
+	err := kerrors.NewBizStatusError(70005, "Invalid Request")
 	return err
 }

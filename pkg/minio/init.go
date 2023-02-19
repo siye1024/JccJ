@@ -5,11 +5,13 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"log"
+	"net"
+	"strings"
 )
 
 var (
 	minioClient     *minio.Client
-	Endpoint        = "192.168.1.104:9000"
+	Endpoint        = ":9000"
 	AccessKeyID     = "doushengMinio"
 	SecretAccessKey = "doushengMinio"
 	UseSSL          = false
@@ -17,10 +19,16 @@ var (
 	//Location        = "chengdu"
 )
 
-func init() {
+func InitMInio() {
 
 	ctx := context.Background()
-
+	ip, err := GetIPv4()
+	if err != nil {
+		log.Fatal("Minio Get IP Failed")
+		return
+	}
+	log.Println(ip)
+	Endpoint = ip + Endpoint
 	client, err := minio.New(Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(AccessKeyID, SecretAccessKey, ""),
 		Secure: UseSSL,
@@ -43,4 +51,15 @@ func init() {
 	} else {
 		log.Println("bucket %s create successfully", BucketName)
 	}
+}
+
+func GetIPv4() (ip string, err error) {
+	conn, err := net.Dial("udp", "8.8.8.8:53")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	ip = strings.Split(localAddr.String(), ":")[0]
+	return
 }

@@ -2,12 +2,21 @@
 	resp.StatusCode		resp.StatusMsg
 
 - 	0					success
--	70001				Error User ID
+-	70001				PLease Log In First!
+-	70002				You have Liked!
+-	70003				Invalid Token or User ID
+-	70004				Invalid Action
+-	70005				Invalid Request
+-	70006				Database Error
+-	70007
+
+-	70001				Error Video ID
 -	70002				Error Action Type
 -	70003				Invalid Token or User ID
 -	70004				Invalid Token
--	70005				Error occurred while binding the request body to the struct
+-	70005				Invalid Request
 -	70006				Database Error
+- 	-1					Favorite Operation Error
 */
 
 package xhttp
@@ -34,12 +43,22 @@ func FavoriteAction(c *gin.Context) {
 	video_id := c.Query("video_id")
 	action_type := c.Query("action_type")
 
+	if len(token) == 0 {
+		respStatusCode = 70001
+		respStatusMsg = "PLease Log In First!"
+		SendResponse(c, gin.H{
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
+		})
+		return
+	}
+
 	vid, err := strconv.Atoi(video_id)
 	if err != nil {
 		log.Println(err)
 		SendResponse(c, gin.H{
-			"status_code": 70001,
-			"status_msg":  "Error User ID",
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
 		})
 		return
 	}
@@ -47,8 +66,8 @@ func FavoriteAction(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 		SendResponse(c, gin.H{
-			"status_code": 70002,
-			"status_msg":  "Error Action Type",
+			"status_code": respStatusCode,
+			"status_msg":  respStatusCode,
 		})
 		return
 	}
@@ -65,8 +84,8 @@ func FavoriteAction(c *gin.Context) {
 	bizErr, isBizErr := kerrors.FromBizStatusError(err)
 	if isBizErr == true || err != nil {
 		if isBizErr == false { // if it is not business error
-			respStatusCode = -1
-			respStatusMsg = "Service Process Error"
+			respStatusCode = respStatusCode
+			respStatusMsg = respStatusMsg
 			log.Println(err.Error())
 		} else { // business err
 			respStatusCode = int(bizErr.BizStatusCode())

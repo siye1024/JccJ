@@ -3,6 +3,7 @@ package main
 import (
 	"dousheng/controller/xrpc"
 	"dousheng/db"
+	"dousheng/pkg/minio"
 	commentsrv "dousheng/rpcserver/comment"
 	favoritesrv "dousheng/rpcserver/favorite"
 	feedsrv "dousheng/rpcserver/feed"
@@ -29,9 +30,10 @@ func main() {
 		r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 	}()
 
-	go func() { // INIT DB
+	go func() { // INIT DB & Minio Client
 		defer wg.Done()
 		db.InitDB()
+		xminio.InitMInio()
 	}()
 
 	go func() { // INIT User RPC server

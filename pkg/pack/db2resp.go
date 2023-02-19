@@ -42,11 +42,12 @@ func PackVideo(ctx context.Context, v *db.Video, fromID int64) (*feed.Video, err
 	comment_count := int64(v.CommentCount)
 
 	isFavorite := false
-	if fromID != 0 { // tourist uid = 0, login user uid != 0
-		results, err := db.GetFavoriteRelation(ctx, fromID, int64(v.ID))
+	if fromID > 0 { // tourist uid = 0, login user uid > 0
+		isFav, err := db.GetFavoriteRelation(ctx, fromID, int64(v.ID))
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
-		} else if results != nil && results.AuthorID != 0 {
+		}
+		if isFav == true {
 			isFavorite = true
 		}
 	}
@@ -168,7 +169,7 @@ func FavoriteVideos(ctx context.Context, vs []db.Video, uid *int64) ([]*feed.Vid
 		videos = append(videos, &v)
 	}
 
-	packVideos, err := Videos(ctx, videos, uid)
+	packVideos, err := PackVideos(ctx, videos, uid)
 	if err != nil {
 		return nil, err
 	}
@@ -176,58 +177,58 @@ func FavoriteVideos(ctx context.Context, vs []db.Video, uid *int64) ([]*feed.Vid
 	return packVideos, nil
 }
 
-// Video pack feed info
-func Video(ctx context.Context, v *db.Video, fromID int64) (*feed.Video, error) {
-	if v == nil {
-		return nil, nil
-	}
-	user, err := db.GetUserByID(ctx, int64(v.AuthorID))
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
-	}
-
-	author, err := PackUser(ctx, user, fromID)
-	if err != nil {
-		return nil, err
-	}
-	favorite_count := int64(v.FavoriteCount)
-	comment_count := int64(v.CommentCount)
-
-	return &feed.Video{
-		Id:            int64(v.ID),
-		Author:        author,
-		PlayUrl:       v.PlayUrl,
-		CoverUrl:      v.CoverUrl,
-		FavoriteCount: favorite_count,
-		CommentCount:  comment_count,
-		Title:         v.Title,
-	}, nil
-}
-
-// Videos pack list of video info
-func Videos(ctx context.Context, vs []*db.Video, fromID *int64) ([]*feed.Video, error) {
-	videos := make([]*feed.Video, 0)
-	for _, v := range vs {
-		video2, err := Video(ctx, v, *fromID)
-		if err != nil {
-			return nil, err
-		}
-
-		if video2 != nil {
-			flag := false
-			if *fromID != 0 {
-				results, err := db.GetFavoriteRelation(ctx, *fromID, int64(v.ID))
-				if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-					return nil, err
-				} else if errors.Is(err, gorm.ErrRecordNotFound) {
-					flag = false
-				} else if results != nil && results.AuthorID != 0 {
-					flag = true
-				}
-			}
-			video2.IsFavorite = flag
-			videos = append(videos, video2)
-		}
-	}
-	return videos, nil
-}
+//// Video pack feed info
+//func Video(ctx context.Context, v *db.Video, fromID int64) (*feed.Video, error) {
+//	if v == nil {
+//		return nil, nil
+//	}
+//	user, err := db.GetUserByID(ctx, int64(v.AuthorID))
+//	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+//		return nil, err
+//	}
+//
+//	author, err := PackUser(ctx, user, fromID)
+//	if err != nil {
+//		return nil, err
+//	}
+//	favorite_count := int64(v.FavoriteCount)
+//	comment_count := int64(v.CommentCount)
+//
+//	return &feed.Video{
+//		Id:            int64(v.ID),
+//		Author:        author,
+//		PlayUrl:       v.PlayUrl,
+//		CoverUrl:      v.CoverUrl,
+//		FavoriteCount: favorite_count,
+//		CommentCount:  comment_count,
+//		Title:         v.Title,
+//	}, nil
+//}
+//
+//// Videos pack list of video info
+//func Videos(ctx context.Context, vs []*db.Video, fromID *int64) ([]*feed.Video, error) {
+//	videos := make([]*feed.Video, 0)
+//	for _, v := range vs {
+//		video2, err := Video(ctx, v, *fromID)
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//		if video2 != nil {
+//			flag := false
+//			if *fromID != 0 {
+//				results, err := db.GetFavoriteRelation(ctx, *fromID, int64(v.ID))
+//				if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+//					return nil, err
+//				} else if errors.Is(err, gorm.ErrRecordNotFound) {
+//					flag = false
+//				} else if results != nil && results.AuthorID != 0 {
+//					flag = true
+//				}
+//			}
+//			video2.IsFavorite = flag
+//			videos = append(videos, video2)
+//		}
+//	}
+//	return videos, nil
+//}
