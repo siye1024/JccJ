@@ -11,17 +11,18 @@ import (
 func GetFavoriteRelation(ctx context.Context, uid int64, vid int64) (bool, error) {
 	//make sure uid and vid exist in the table
 	user := new(User)
-	if err := DB.WithContext(ctx).First(user, uid).Error; err != nil {
+	if err := DB.WithContext(ctx).First(&user, uid).Error; err != nil {
 		return false, err
 	}
+
 	video := new(Video)
-	if err := DB.WithContext(ctx).Model(&user).Association("FavoriteVideos").Find(video, vid); err != nil {
+	if err := DB.WithContext(ctx).Model(&user).Association("FavoriteVideos").Find(&video, vid); err != nil {
 		return false, err
 	}
-	if video.AuthorID != 0 { // double check
-		return true, nil
+	if video == nil || video.AuthorID == 0 {
+		return false, nil
 	}
-	return false, errors.New("Unexpected Error")
+	return true, nil
 }
 
 // Favorite new favorite data.
@@ -146,5 +147,3 @@ func FavoriteList(ctx context.Context, uid int64) ([]Video, error) {
 	}
 	return videos, nil
 }
-
-
