@@ -27,7 +27,7 @@ func (s *CommentListService) CommentList(req *comment.DouyinCommentListRequest, 
 		return nil, err
 	}
 
-	comments, err := pack.PackComments(s.ctx, Comments, fromID)
+	comments, err := pack.Comments(s.ctx, Comments, fromID)
 	if err != nil {
 		err := kerrors.NewBizStatusError(30006, "Get the Comment List Error")
 		return nil, err

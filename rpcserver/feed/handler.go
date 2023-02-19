@@ -54,7 +54,7 @@ func (s *FeedSrvImpl) GetUserFeed(ctx context.Context, req *feed.DouyinFeedReque
 		nextTime = videos[len(videos)-1].UpdatedAt.UnixMilli()
 	}
 
-	vis, err := pack.PackVideos(ctx, videos, &uid)
+	vis, err := pack.Videos(ctx, videos, &uid)
 	if err != nil {
 		log.Println(err)
 		return nil, err

@@ -126,7 +126,7 @@ func (s *PublishSrvImpl) PublishList(ctx context.Context, req *publish.DouyinPub
 		return nil, err
 	}
 
-	video_list, err := pack.PackVideos(ctx, videos, &req.UserId)
+	video_list, err := pack.Videos(ctx, videos, &req.UserId)
 	if err != nil {
 		return nil, err
 	}

@@ -25,7 +25,7 @@ func (s *FollowingListOp) FollowingList(req *relation.DouyinRelationFollowListRe
 	if err != nil {
 		return nil, err
 	}
-	return pack.PackFollowingList(s.ctx, FollowingUser, fromID)
+	return pack.FollowingList(s.ctx, FollowingUser, fromID)
 }
 
 type FollowerListOp struct {

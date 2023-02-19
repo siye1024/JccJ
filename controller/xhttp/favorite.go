@@ -8,7 +8,6 @@
 -	70004				Invalid Action
 -	70005				Invalid Request
 -	70006				Database Error
--	70007
 
 -	70001				Error Video ID
 -	70002				Error Action Type
@@ -83,9 +82,7 @@ func FavoriteAction(c *gin.Context) {
 	})
 	bizErr, isBizErr := kerrors.FromBizStatusError(err)
 	if isBizErr == true || err != nil {
-		if isBizErr == false { // if it is not business error
-			respStatusCode = respStatusCode
-			respStatusMsg = respStatusMsg
+		if isBizErr == false { // if it is not business error, return -1 default error
 			log.Println(err.Error())
 		} else { // business err
 			respStatusCode = int(bizErr.BizStatusCode())
@@ -107,13 +104,13 @@ func FavoriteList(c *gin.Context) {
 	var (
 		param          UserParam
 		respStatusCode = -1
-		respStatusMsg  = "Favorite Operation Error"
+		respStatusMsg  = "Get Favorite List Error"
 	)
 	userid, err := strconv.Atoi(c.Query("user_id"))
 	if err != nil {
 		SendResponse(c, gin.H{
-			"status_code": 70001,
-			"status_msg":  "Error User ID",
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
 		})
 		return
 	}
@@ -134,9 +131,7 @@ func FavoriteList(c *gin.Context) {
 	})
 	bizErr, isBizErr := kerrors.FromBizStatusError(err)
 	if isBizErr == true || err != nil {
-		if isBizErr == false { // if it is not business error
-			respStatusCode = -1
-			respStatusMsg = "Service Process Error"
+		if isBizErr == false { // if it is not business error, return -1 default error
 			log.Println(err.Error())
 		} else { // business err
 			respStatusCode = int(bizErr.BizStatusCode())

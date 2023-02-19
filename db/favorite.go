@@ -19,6 +19,8 @@ func GetFavoriteRelation(ctx context.Context, uid int64, vid int64) (bool, error
 	if err := DB.WithContext(ctx).Model(&user).Association("FavoriteVideos").Find(&video, vid); err != nil {
 		return false, err
 	}
+	//please note that Asscoation(xx).Find(&xx,xx) wouldn't return gorm.ErrRecordNotFound if no finding
+
 	if video == nil || video.AuthorID == 0 {
 		return false, nil
 	}
@@ -119,7 +121,7 @@ func DisFavorite(ctx context.Context, uid int64, vid int64) error {
 		return err
 	}
 	if video.FavoriteCount < 0 {
-		//TODO ADD RETRY Method
+		//TODO: ADD RETRY Method
 		err = Favorite(ctx, uid, vid)
 		if err != nil {
 			logger.Errorf("video %d has negative favorite count, rollback error")
@@ -138,9 +140,6 @@ func FavoriteList(ctx context.Context, uid int64) ([]Video, error) {
 	}
 
 	videos := []Video{}
-	// if err := DB.WithContext(ctx).First(&video, vid).Error; err != nil {
-	// 	return nil, err
-	// }
 
 	if err := DB.WithContext(ctx).Model(&user).Association("FavoriteVideos").Find(&videos); err != nil {
 		return nil, err

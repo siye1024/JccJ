@@ -59,11 +59,10 @@ func (s *FavoriteSrvImpl) FavoriteList(ctx context.Context, req *favorite.Douyin
 	)
 	claim, err := xhttp.Jwt.ParseToken(req.Token)
 	if err != nil {
-		err := kerrors.NewBizStatusError(70004, "Invalid Token")
 		return nil, err
 	}
 
-	if req.UserId == 0 || claim.Id == 0 {
+	if req.UserId <= 0 || claim.Id <= 0 || req.UserId != claim.Id {
 		err := kerrors.NewBizStatusError(70003, "Invalid Token or User ID")
 		return nil, err
 	}
