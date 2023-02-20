@@ -166,7 +166,7 @@ func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserReque
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
-		if relation != nil && relation.UserID != 0 {
+		if relation != nil && relation.UserID != 0 { //double check is necessary
 			isFollow = true
 		}
 

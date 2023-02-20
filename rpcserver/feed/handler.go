@@ -51,7 +51,7 @@ func (s *FeedSrvImpl) GetUserFeed(ctx context.Context, req *feed.DouyinFeedReque
 	if len(videos) < LIMIT {
 		nextTime = time.Now().UnixMilli() //reset time if rest videos are less than LIMIT
 	} else {
-		nextTime = videos[len(videos)-1].UpdatedAt.UnixMilli()
+		nextTime = videos[len(videos)-1].CreatedAt.UnixMilli()
 	}
 
 	vis, err := pack.Videos(ctx, videos, &uid)
