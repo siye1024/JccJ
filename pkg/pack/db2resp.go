@@ -96,7 +96,7 @@ func User(ctx context.Context, u *db.User, fromID int64) (*user.User, error) {
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
-		if relation != nil {
+		if relation != nil && relation.UserID != 0 {
 			isFollow = true
 		}
 	}

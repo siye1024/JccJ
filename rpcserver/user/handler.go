@@ -8,12 +8,14 @@ import (
 	user "dousheng/rpcserver/kitex_gen/user"
 	svr "dousheng/rpcserver/kitex_gen/user/usersrv"
 	api2 "dousheng/rpcserver/user/api"
+	"errors"
 	"github.com/cloudwego/kitex/pkg/kerrors"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/pkg/transmeta"
 	"github.com/cloudwego/kitex/server"
 	etcd "github.com/kitex-contrib/registry-etcd"
+	"gorm.io/gorm"
 	"log"
 	"net"
 	"time"
@@ -153,29 +155,28 @@ func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserReque
 		return nil, err
 	}
 
-	follow_count := int64(*u.FollowCount)
-	follower_count := int64(*u.FollowerCount)
-
 	// true means the claim.id has follow the modelUser.id, false means not follow
 
 	isFollow := false
 	if claim.Id == u.Id {
-		isFollow = false
+		isFollow = true
 	} else {
 		relation := new(db.Relation)
-		if err := db.DB.WithContext(ctx).First(&relation, "user_id = ? and to_user_id = ?", claim.Id, u.Id).Error; err != nil {
+		err := db.DB.WithContext(ctx).First(&relation, "user_id = ? and to_user_id = ?", claim.Id, u.Id).Error
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
-		if relation != nil {
+		if relation != nil && relation.UserID != 0 {
 			isFollow = true
 		}
+
 	}
 
 	userInfo := &user.User{
 		Id:            int64(u.Id),
 		Name:          u.Name,
-		FollowCount:   &follow_count,
-		FollowerCount: &follower_count,
+		FollowCount:   u.FollowCount,
+		FollowerCount: u.FollowerCount,
 		IsFollow:      isFollow,
 	}
 
