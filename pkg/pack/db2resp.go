@@ -96,7 +96,7 @@ func User(ctx context.Context, u *db.User, fromID int64) (*user.User, error) {
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
-		if relation != nil && relation.UserID != 0 {
+		if relation != nil && relation.UserID != 0 { //double check is necessary
 			isFollow = true
 		}
 	}
@@ -163,22 +163,21 @@ func FollowerList(ctx context.Context, vs []*db.Relation, fromID int64) ([]*user
 }
 
 // FavoriteVideos pack favoriteVideos info.
-func FavoriteVideos(ctx context.Context, vs []db.Video, uid *int64) ([]*feed.Video, error) {
+func FavoriteVideos(ctx context.Context, vs []*db.Video, uid *int64) ([]*feed.Video, error) {
 	videos := make([]*db.Video, 0) // db.Video -> * dbVideo
-	for _, v := range vs {
-		videos = append(videos, &v)
+	for i, _ := range vs {
+		videos = append(videos, vs[i])
 	}
 
-	packVideos, err := PackFaVideos(ctx, videos, uid, len(videos))
+	packVideos, err := PackFaVideos(ctx, vs, uid)
 	if err != nil {
 		return nil, err
 	}
-
 	return packVideos, nil
 }
-func PackFaVideos(ctx context.Context, vs []*db.Video, fromID *int64, lens int) ([]*feed.Video, error) {
-	videos := make([]*feed.Video, lens)
-	for i, v := range vs {
+func PackFaVideos(ctx context.Context, vs []*db.Video, fromID *int64) ([]*feed.Video, error) {
+	videos := make([]*feed.Video, 0)
+	for _, v := range vs {
 		video_author, err := db.GetUserByID(ctx, int64(v.AuthorID))
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
@@ -200,7 +199,7 @@ func PackFaVideos(ctx context.Context, vs []*db.Video, fromID *int64, lens int) 
 			Title:         v.Title,
 		}
 
-		videos[i] = video2
+		videos = append(videos, video2)
 	}
 
 	return videos, nil

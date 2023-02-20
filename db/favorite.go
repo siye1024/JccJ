@@ -133,16 +133,17 @@ func DisFavorite(ctx context.Context, uid int64, vid int64) error {
 }
 
 // FavoriteList returns a list of Favorite videos.
-func FavoriteList(ctx context.Context, uid int64) ([]Video, error) {
+func FavoriteList(ctx context.Context, uid int64) ([]*Video, error) {
 	user := new(User)
 	if err := DB.WithContext(ctx).First(user, uid).Error; err != nil {
 		return nil, err
 	}
 
-	videos := []Video{}
+	videos := []*Video{}
 
 	if err := DB.WithContext(ctx).Model(&user).Association("FavoriteVideos").Find(&videos); err != nil {
 		return nil, err
 	}
+
 	return videos, nil
 }

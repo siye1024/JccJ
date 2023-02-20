@@ -62,7 +62,7 @@ func (s *FavoriteSrvImpl) FavoriteList(ctx context.Context, req *favorite.Douyin
 		return nil, err
 	}
 
-	if req.UserId <= 0 || claim.Id <= 0 || req.UserId != claim.Id {
+	if req.UserId <= 0 || claim.Id <= 0 { // if user can only see his own fav list, need req.UserId != claim.Id
 		err := kerrors.NewBizStatusError(70003, "Invalid Token or User ID")
 		return nil, err
 	}

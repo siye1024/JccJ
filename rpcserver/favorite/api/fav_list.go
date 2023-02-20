@@ -27,6 +27,7 @@ func (s *FavoriteListOp) FavoriteList(req *favorite.DouyinFavoriteListRequest) (
 	}
 
 	videos, err := pack.FavoriteVideos(s.ctx, FavoriteVideos, &req.UserId)
+
 	if err != nil {
 		return nil, err
 	}
