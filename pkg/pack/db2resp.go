@@ -100,13 +100,25 @@ func User(ctx context.Context, u *db.User, fromID int64) (*user.User, error) {
 			isFollow = true
 		}
 	}
+	works, err := db.PublishList(ctx, int64(u.ID))
+	if err != nil {
+		return nil, err
+	}
+	workCount := int64(len(works))
 
+	favs, err := db.FavoriteList(ctx, int64(u.ID))
+	if err != nil {
+		return nil, err
+	}
+	favCount := int64(len(favs))
 	return &user.User{
 		Id:            int64(u.ID),
 		Name:          u.UserName,
 		FollowCount:   &follow_count,
 		FollowerCount: &follower_count,
 		IsFollow:      isFollow,
+		WorkCount:     &workCount,
+		FavoriteCount: &favCount,
 	}, nil
 }
 

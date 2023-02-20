@@ -112,13 +112,12 @@ func (s *PublishSrvImpl) PublishAction(ctx context.Context, req *publish.DouyinP
 
 // PublishList implements the PublishSrvImpl interface.
 func (s *PublishSrvImpl) PublishList(ctx context.Context, req *publish.DouyinPublishListRequest) (resp *publish.DouyinPublishListResponse, err error) {
-	claim, err := xhttp.Jwt.ParseToken(req.Token)
-	if err != nil {
-		return nil, nil
-	}
+	var (
+		respMsg = "Get Pulish List Successfully"
+	)
 
-	if req.UserId == 0 {
-		req.UserId = claim.Id // 没有传入UserID，默认为自己
+	if req.UserId <= 0 {
+		return nil, kerrors.NewBizStatusError(21001, "Invalid User or User Token")
 	}
 
 	videos, err := db.PublishList(ctx, req.UserId)
@@ -131,7 +130,6 @@ func (s *PublishSrvImpl) PublishList(ctx context.Context, req *publish.DouyinPub
 		return nil, err
 	}
 
-	respMsg := "Get Publish List Success"
 	resp = &publish.DouyinPublishListResponse{
 		StatusCode: 0,
 		StatusMsg:  &respMsg,
