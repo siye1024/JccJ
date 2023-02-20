@@ -35,14 +35,22 @@ func PublishAction(c *gin.Context) {
 	_, fileHeader, err := c.Request.FormFile("data")
 	if err != nil {
 		log.Println(err)
-		SendResponse(c, gin.H{"status_code": respStatusCode, "status_msg": respStatusMsg})
+		SendResponse(c, gin.H{
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
+		})
+
 		return
 	}
 
 	file, err := fileHeader.Open()
 	if err != nil {
 		log.Println(err)
-		SendResponse(c, gin.H{"status_code": respStatusCode, "status_msg": respStatusMsg})
+		SendResponse(c, gin.H{
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
+		})
+
 		return
 	}
 
@@ -51,7 +59,10 @@ func PublishAction(c *gin.Context) {
 	buf := bytes.NewBuffer(nil)
 	if _, err := io.Copy(buf, file); err != nil {
 		log.Println(err)
-		SendResponse(c, gin.H{"status_code": respStatusCode, "status_msg": respStatusMsg})
+		SendResponse(c, gin.H{
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
+		})
 		return
 	}
 
@@ -91,7 +102,11 @@ func PublishList(c *gin.Context) {
 	user_id, err := strconv.Atoi(c.Query("user_id"))
 	if err != nil {
 		log.Println(err)
-		SendResponse(c, gin.H{"status_code": respStatusCode, "status_msg": respStatusMsg})
+		SendResponse(c, gin.H{
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
+		})
+
 		return
 	}
 
@@ -100,7 +115,11 @@ func PublishList(c *gin.Context) {
 
 	if len(paramVar.Token) == 0 || paramVar.UserId < 0 {
 		respStatusMsg = "Invalid Login User"
-		SendResponse(c, gin.H{"status_code": 21001, "status_msg": respStatusMsg})
+		SendResponse(c, gin.H{
+			"status_code": 21001,
+			"status_msg":  respStatusMsg,
+		})
+
 		return
 	}
 
@@ -120,9 +139,9 @@ func PublishList(c *gin.Context) {
 			"status_code": respStatusCode,
 			"status_msg":  respStatusMsg,
 		})
+
 		return
 	}
 
 	SendResponse(c, resp) // service success
-
 }

@@ -24,15 +24,11 @@ func initPublishRpc() {
 
 	c, err := publishsrv.NewClient(
 		"videoPublish",
-		//client.WithMiddleware(middleware.CommonMiddleware),
-		//client.WithInstanceMW(middleware.ClientMiddleware),
 		client.WithMuxConnection(1),                       // mux
 		client.WithRPCTimeout(30*time.Second),             // rpc timeout
 		client.WithConnectTimeout(30000*time.Millisecond), // conn timeout
 		client.WithFailureRetry(retry.NewFailurePolicy()), // retry
-		//client.WithSuite(tracing.NewClientSuite()),        // tracer
-		client.WithResolver(r), // resolver
-		// Please keep the same as provider.WithServiceName
+		client.WithResolver(r),                            // resolver
 		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: "videoPublish"}),
 	)
 	if err != nil {

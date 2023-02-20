@@ -74,6 +74,7 @@ func (s *FeedSrvImpl) GetVideoById(ctx context.Context, req *feed.VideoIdRequest
 
 	return nil, errors.New("Unsupport Service")
 }
+
 func (s *FeedSrvImpl) Start() {
 	r, err := etcd.NewEtcdRegistry([]string{"127.0.0.1:2379"})
 	if err != nil {
