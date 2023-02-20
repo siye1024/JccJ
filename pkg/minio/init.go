@@ -22,13 +22,17 @@ var (
 func InitMInio() {
 
 	ctx := context.Background()
+	//only for test
 	ip, err := GetIPv4()
 	if err != nil {
 		log.Fatal("Minio Get IP Failed")
 		return
 	}
+
+	//ip := "47.93.27.219"
 	log.Println(ip)
 	Endpoint = ip + Endpoint
+
 	client, err := minio.New(Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(AccessKeyID, SecretAccessKey, ""),
 		Secure: UseSSL,
