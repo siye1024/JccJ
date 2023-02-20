@@ -115,6 +115,7 @@ func FollowingList(ctx context.Context, uid int64) ([]*Relation, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return RelationList, nil
 }
 

@@ -170,6 +170,17 @@ func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserReque
 		}
 
 	}
+	works, err := db.PublishList(ctx, u.Id)
+	if err != nil {
+		return nil, err
+	}
+	workCount := int64(len(works))
+
+	favs, err := db.FavoriteList(ctx, u.Id)
+	if err != nil {
+		return nil, err
+	}
+	favCount := int64(len(favs))
 
 	userInfo := &user.User{
 		Id:            int64(u.Id),
@@ -177,6 +188,8 @@ func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserReque
 		FollowCount:   u.FollowCount,
 		FollowerCount: u.FollowerCount,
 		IsFollow:      isFollow,
+		WorkCount:     &workCount,
+		FavoriteCount: &favCount,
 	}
 
 	resp = &user.DouyinUserResponse{
