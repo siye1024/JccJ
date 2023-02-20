@@ -10,7 +10,7 @@ import (
 type User struct {
 	gorm.Model
 	UserName       string   `gorm:"index:idx_username,unique;type:varchar(40);not null" json:"username"`
-	Password       string   `gorm:"type:varchar(256);not null" json:"password"`
+	Password       string   `gorm:"type:varchar(255);not null" json:"password"`
 	FavoriteVideos []*Video `gorm:"many2many:user_favorite_videos" json:"favorite_videos"`
 	FollowCount    int64    `gorm:"default:0" json:"follow_count"`
 	FollowerCount  int64    `gorm:"default:0" json:"follower_count"`
