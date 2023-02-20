@@ -50,7 +50,7 @@ func (s *CheckUserOp) CheckUser(req *user.DouyinUserRegisterRequest) (int64, err
 	}
 
 	if !pwdMatch {
-		err := kerrors.NewBizStatusError(10008, "Invalid Username of Password")
+		err := kerrors.NewBizStatusError(10008, "Invalid Username or Password")
 		return 0, err
 	}
 

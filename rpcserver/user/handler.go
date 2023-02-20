@@ -156,7 +156,6 @@ func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserReque
 	}
 
 	// true means the claim.id has follow the modelUser.id, false means not follow
-
 	isFollow := false
 	if claim.Id == u.Id {
 		isFollow = true
