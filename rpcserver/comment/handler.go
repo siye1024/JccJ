@@ -26,7 +26,8 @@ type CommentSrvImpl struct{}
 // CommentAction implements the CommentSrvImpl interface.
 func (s *CommentSrvImpl) CommentAction(ctx context.Context, req *comment.DouyinCommentActionRequest) (resp *comment.DouyinCommentActionResponse, err error) {
 	var (
-		respStatusMsg = "User Comment Success"
+		respStatusMsg       = "User Comment Success"
+		contentTxt, tFormat string
 	)
 	claim, err := xhttp.Jwt.ParseToken(req.Token)
 	if err != nil {
@@ -40,26 +41,32 @@ func (s *CommentSrvImpl) CommentAction(ctx context.Context, req *comment.DouyinC
 	}
 
 	if req.ActionType != 1 && req.ActionType != 2 || req.UserId <= 0 || req.VideoId <= 0 {
-		err := kerrors.NewBizStatusError(30002, "Invalid Action")
-		return nil, err
+		return nil, kerrors.NewBizStatusError(30002, "Invalid Action")
 	}
 
-	err = api.NewCommentActionService(ctx).CommentAction(req)
+	commentId, err := api.NewCommentActionService(ctx).CommentAction(req)
 	if err != nil {
 		return nil, err
+	}
+	if commentId <= 0 {
+		return nil, kerrors.NewBizStatusError(30002, "Invalid Comment ID")
 	}
 
 	userinfo, err := xrpc.GetUserById(ctx, &user.DouyinUserRequest{
 		UserId: req.UserId,
 		Token:  req.Token,
 	})
-	t := time.Now()
-	tFormat := fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day())
+
+	if req.ActionType == 1 {
+		contentTxt = *req.CommentText
+		t := time.Now()
+		tFormat = fmt.Sprintf("%d-%02d-%02d", t.Year(), t.Month(), t.Day())
+	}
 
 	commentInfo := comment.Comment{
-		Id:         int64(req.VideoId), //TODO: it should be comment id
+		Id:         commentId,
 		User:       userinfo.User,
-		Content:    *req.CommentText,
+		Content:    contentTxt,
 		CreateDate: tFormat,
 	}
 
@@ -113,9 +120,9 @@ func (s *CommentSrvImpl) Start() {
 		server.WithMetaHandler(transmeta.ServerTTHeaderHandler), //support kerrors
 		//server.WithMiddleware(middleware.CommonMiddleware),               // middleware
 		//server.WithMiddleware(middleware.ServerMiddleware),               // middleware
-		server.WithRegistry(r), // registry
+		server.WithRegistry(r),                                             // registry
 		server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}), // limit
-		server.WithMuxTransport(), // Multiplex
+		server.WithMuxTransport(),                                          // Multiplex
 		//server.WithSuite(tracing.NewServerSuite()),                         // trace
 		// Please keep the same as provider.WithServiceName
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: "commentService"}),

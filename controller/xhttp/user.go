@@ -136,14 +136,23 @@ func GetUserById(c *gin.Context) {
 		getUserByIdMsg UserParam
 		respStatusCode = -1
 		respStatusMsg  = "Get User Info Error"
+		userid         int
+		err            error
 	)
-	userid, err := strconv.Atoi(c.Query("user_id"))
-	if err != nil {
-		SendResponse(c, gin.H{
-			"status_code": respStatusCode,
-			"status_msg":  respStatusMsg,
-		})
+	user_id := c.Query("user_id")
+	if len(user_id) > 0 {
+		userid, err = strconv.Atoi(user_id)
+		if err != nil {
+			SendResponse(c, gin.H{
+				"status_code": respStatusCode,
+				"status_msg":  respStatusMsg,
+			})
+			return
+		}
+	} else {
+		userid = 0
 	}
+
 	getUserByIdMsg.UserId = int64(userid)
 	getUserByIdMsg.Token = c.Query("token")
 

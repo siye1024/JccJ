@@ -112,12 +112,11 @@ func User(ctx context.Context, u *db.User, fromID int64) (*user.User, error) {
 	}
 	favCount := int64(len(favs))
 	return &user.User{
-		Id:            int64(u.ID),
-		Name:          u.UserName,
-		FollowCount:   &follow_count,
-		FollowerCount: &follower_count,
-		IsFollow:      isFollow,
-
+		Id:             int64(u.ID),
+		Name:           u.UserName,
+		FollowCount:    &follow_count,
+		FollowerCount:  &follower_count,
+		IsFollow:       isFollow,
 		WorkCount:      &workCount,
 		FavoriteCount:  &favCount,
 		TotalFavorited: &u.FavoritedCount,

@@ -22,7 +22,8 @@ func (Comment) TableName() string {
 }
 
 // NewComment creates a new Comment
-func NewComment(ctx context.Context, comment *Comment) error {
+func NewComment(ctx context.Context, comment *Comment) (int64, error) {
+	var commentId int64
 	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 在事务中执行一些 db 操作（从这里开始，您应该使用 'tx' 而不是 'db'）
 		// 1. 新增评论数据
@@ -30,6 +31,7 @@ func NewComment(ctx context.Context, comment *Comment) error {
 		if err != nil {
 			return err
 		}
+		commentId = int64(comment.ID)
 
 		// 2.改变 video 表中的 comment count
 		res := tx.Model(&Video{}).Where("ID = ?", comment.VideoID).Update("comment_count", gorm.Expr("comment_count + ?", 1))
@@ -44,7 +46,7 @@ func NewComment(ctx context.Context, comment *Comment) error {
 
 		return nil
 	})
-	return err
+	return commentId, err
 }
 
 // DelComment deletes a comment from the database.

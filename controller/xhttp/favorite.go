@@ -8,13 +8,6 @@
 -	70004				Invalid Action
 -	70005				Invalid Request
 -	70006				Database Error
-
--	70001				Error Video ID
--	70002				Error Action Type
--	70003				Invalid Token or User ID
--	70004				Invalid Token
--	70005				Invalid Request
--	70006				Database Error
 - 	-1					Favorite Operation Error
 */
 

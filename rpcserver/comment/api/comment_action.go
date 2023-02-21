@@ -17,19 +17,23 @@ func NewCommentActionService(ctx context.Context) *CommentActionService {
 }
 
 // CommentActionService action comment.
-func (s *CommentActionService) CommentAction(req *comment.DouyinCommentActionRequest) error {
+func (s *CommentActionService) CommentAction(req *comment.DouyinCommentActionRequest) (int64, error) {
 	// 1-评论
 	if req.ActionType == 1 {
-		return db.NewComment(s.ctx, &db.Comment{
+		commentId, err := db.NewComment(s.ctx, &db.Comment{
 			UserID:  req.UserId,
 			VideoID: req.VideoId,
 			Content: *req.CommentText,
 		})
+		if err != nil {
+			return commentId, err
+		}
+		return commentId, err
 	}
 	// 2-删除评论
 	if req.ActionType == 2 {
-		return db.DelComment(s.ctx, *req.CommentId, req.VideoId)
+		return *req.CommentId, db.DelComment(s.ctx, *req.CommentId, req.VideoId)
 	}
 
-	return kerrors.NewBizStatusError(30002, "Invalid Action")
+	return 0, kerrors.NewBizStatusError(30002, "Invalid Action")
 }
