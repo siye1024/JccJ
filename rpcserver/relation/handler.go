@@ -125,6 +125,7 @@ func (s *RelationSrvImpl) RelationFollowerList(ctx context.Context, req *relatio
 
 	return resp, nil
 }
+
 func (s *RelationSrvImpl) RelationFriendList(ctx context.Context, req *relation.DouyinRelationFriendListRequest) (resp *relation.DouyinRelationFriendListResponse, err error) {
 	// TODO: Your code here...
 	return

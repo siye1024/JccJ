@@ -114,9 +114,19 @@ func (s *PublishSrvImpl) PublishAction(ctx context.Context, req *publish.DouyinP
 func (s *PublishSrvImpl) PublishList(ctx context.Context, req *publish.DouyinPublishListRequest) (resp *publish.DouyinPublishListResponse, err error) {
 	var (
 		respMsg = "Get Pulish List Successfully"
+		user_id int64
 	)
+	if len(req.Token) == 0 {
+		user_id = 0
+	} else {
+		claim, err := xhttp.Jwt.ParseToken(req.Token)
+		if err != nil {
+			return nil, err
+		}
+		user_id = claim.Id
+	}
 
-	if req.UserId <= 0 {
+	if req.UserId <= 0 || user_id < 0 {
 		return nil, kerrors.NewBizStatusError(21001, "Invalid User or User Token")
 	}
 

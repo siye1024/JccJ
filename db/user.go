@@ -14,6 +14,7 @@ type User struct {
 	FavoriteVideos []*Video `gorm:"many2many:user_favorite_videos" json:"favorite_videos"`
 	FollowCount    int64    `gorm:"default:0" json:"follow_count"`
 	FollowerCount  int64    `gorm:"default:0" json:"follower_count"`
+	FavoritedCount int64    `gorm:"default:0" json:"favorited_count"`
 }
 
 func (User) TableName() string {

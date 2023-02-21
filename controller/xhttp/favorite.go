@@ -117,7 +117,7 @@ func FavoriteList(c *gin.Context) {
 	param.UserId = int64(userid)
 	param.Token = c.Query("token")
 
-	if len(param.Token) == 0 || param.UserId < 0 {
+	if param.UserId <= 0 {
 		SendResponse(c, gin.H{
 			"status_code": 70003,
 			"status_msg":  "Invalid Token or User ID",
