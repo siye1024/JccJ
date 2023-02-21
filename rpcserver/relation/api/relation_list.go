@@ -48,3 +48,12 @@ func (s *FollowerListOp) FollowerList(req *relation.DouyinRelationFollowerListRe
 
 	return pack.FollowerList(s.ctx, FollowerUser, fromID)
 }
+
+func (s *FollowerListOp) FriendList(fromID int64) ([]*user.User, error) {
+	FriendUser, err := db.FriendList(s.ctx, fromID)
+	if err != nil {
+		return nil, err
+	}
+
+	return pack.FriendList(s.ctx, FriendUser)
+}

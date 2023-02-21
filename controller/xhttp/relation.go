@@ -193,3 +193,58 @@ func FollowerList(c *gin.Context) {
 
 	SendResponse(c, resp)
 }
+
+func FriendList(c *gin.Context) {
+	var (
+		param          UserParam
+		respStatusCode = -1
+		respStatusMsg  = "Get Friend List Error"
+		userid         int
+		err            error
+	)
+	user_id := c.Query("user_id")
+	if len(user_id) > 0 {
+		userid, err = strconv.Atoi(user_id)
+		if err != nil {
+			SendResponse(c, gin.H{
+				"status_code": respStatusCode,
+				"status_msg":  respStatusMsg,
+			})
+			return
+		}
+	} else {
+		userid = 0
+	}
+
+	param.UserId = int64(userid)
+	param.Token = c.Query("token")
+
+	if len(param.Token) == 0 || param.UserId <= 0 { //can't be friend with tourist
+		SendResponse(c, gin.H{
+			"status_code": 40003,
+			"status_msg":  "Error Token or UserID",
+		})
+		return
+	}
+	resp, err := xrpc.RelationFriendList(c, &relation.DouyinRelationFriendListRequest{
+		UserId: param.UserId,
+		Token:  param.Token,
+	})
+	bizErr, isBizErr := kerrors.FromBizStatusError(err)
+	if isBizErr == true || err != nil {
+		if isBizErr == false { // if it is not business error, return -1 default error
+			log.Println(err.Error())
+		} else { // business err
+			respStatusCode = int(bizErr.BizStatusCode())
+			respStatusMsg = bizErr.BizMessage()
+		}
+		SendResponse(c, gin.H{
+			"status_code": respStatusCode,
+			"status_msg":  respStatusMsg,
+		})
+
+		return
+	}
+
+	SendResponse(c, resp)
+}
