@@ -143,25 +143,26 @@ func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserReque
 
 	if req.UserId < 0 {
 		return nil, kerrors.NewBizStatusError(10007, "Invalid Username")
+	} else if req.UserId == 0 {
+		req.UserId = claim.Id
 	}
 
-	u := new(user.User)
-	if err := db.DB.WithContext(ctx).First(&u, req.UserId).Error; err != nil {
+	u := new(db.User)
+	if err := db.DB.WithContext(ctx).Where("id = ?", req.UserId).First(u).Error; err != nil {
 		return nil, err
 	}
-
-	if u == nil || u.Id == 0 {
+	if u == nil || u.ID == 0 {
 		err := kerrors.NewBizStatusError(10009, "User Already Withdraw")
 		return nil, err
 	}
 
 	// true means the claim.id has follow the modelUser.id, false means not follow
 	isFollow := false
-	if claim.Id == u.Id {
+	if claim.Id == int64(u.ID) {
 		isFollow = true
 	} else {
 		relation := new(db.Relation)
-		err := db.DB.WithContext(ctx).First(&relation, "user_id = ? and to_user_id = ?", claim.Id, u.Id).Error
+		err := db.DB.WithContext(ctx).First(&relation, "user_id = ? and to_user_id = ?", claim.Id, u.ID).Error
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
@@ -170,27 +171,27 @@ func (s *UserSrvImpl) GetUserById(ctx context.Context, req *user.DouyinUserReque
 		}
 
 	}
-	works, err := db.PublishList(ctx, u.Id)
+	works, err := db.PublishList(ctx, int64(u.ID))
 	if err != nil {
 		return nil, err
 	}
 	workCount := int64(len(works))
 
-	favs, err := db.FavoriteList(ctx, u.Id)
+	favs, err := db.FavoriteList(ctx, int64(u.ID))
 	if err != nil {
 		return nil, err
 	}
 	favCount := int64(len(favs))
 
 	userInfo := &user.User{
-		Id:             int64(u.Id),
-		Name:           u.Name,
-		FollowCount:    u.FollowCount,
-		FollowerCount:  u.FollowerCount,
+		Id:             int64(u.ID),
+		Name:           u.UserName,
+		FollowCount:    &u.FollowCount,
+		FollowerCount:  &u.FollowerCount,
 		IsFollow:       isFollow,
 		WorkCount:      &workCount,
 		FavoriteCount:  &favCount,
-		TotalFavorited: u.TotalFavorited,
+		TotalFavorited: &u.FavoritedCount,
 	}
 
 	resp = &user.DouyinUserResponse{

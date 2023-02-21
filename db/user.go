@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"gorm.io/gorm"
+	"log"
 )
 
 // User Gorm Data Structures
@@ -22,8 +23,11 @@ func (User) TableName() string {
 }
 
 // CreateUser create user info
-func CreateUser(ctx context.Context, users []*User) error {
-	return DB.WithContext(ctx).Create(users).Error
+func CreateUser(ctx context.Context, users User) error {
+
+	log.Println(users)
+
+	return DB.WithContext(ctx).Create(&users).Error
 }
 
 func QueryUser(ctx context.Context, userName string) ([]*User, error) {

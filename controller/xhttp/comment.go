@@ -5,16 +5,9 @@
 -	30001				PLease Log In First!
 -	30002				Invalid Action
 -	30003				Invalid Token or User ID
+-	30004				Invalid Comment ID
 -	30005				Invalid Video
 -	30009				Database Error
-
--	30004				Comment Error
-
--	30006				Get the Comment List Error
--	30007				Get Token Error
--	30008				Comment Operation Error
-
--	30010				Error occurred while binding the request body to the struct
 - 	-1					Comment Service Error
 */
 package xhttp
@@ -115,7 +108,6 @@ func CommentAction(c *gin.Context) {
 
 		return
 	}
-
 	SendResponse(c, resp)
 }
 
@@ -164,6 +156,5 @@ func CommentList(c *gin.Context) {
 
 		return
 	}
-
 	SendResponse(c, resp)
 }

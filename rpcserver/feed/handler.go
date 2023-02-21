@@ -30,7 +30,7 @@ func (s *FeedSrvImpl) GetUserFeed(ctx context.Context, req *feed.DouyinFeedReque
 	var (
 		uid           int64 = 0
 		nextTime      int64
-		respStatusMsg = "User Register Success"
+		respStatusMsg = "User Get Video Feed Successfully"
 	)
 	//do not need to check latest time again
 	//check Token

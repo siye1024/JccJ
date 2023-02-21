@@ -52,5 +52,6 @@ func Feed(c *gin.Context) {
 		SendResponse(c, gin.H{"status_code": respStatusCode, "status_msg": respStatusMsg})
 		return
 	}
+
 	SendResponse(c, resp)
 }

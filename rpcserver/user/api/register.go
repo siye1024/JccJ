@@ -37,10 +37,10 @@ func (s *CreateUserOp) CreateUser(req *user.DouyinUserRegisterRequest, arg2Param
 		return err
 	}
 
-	return db.CreateUser(s.ctx, []*db.User{{
+	return db.CreateUser(s.ctx, db.User{
 		UserName: req.Username,
 		Password: password,
-	}})
+	})
 }
 
 // encode the plaintext password to the hash password
