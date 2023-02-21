@@ -106,11 +106,11 @@ func (s *RelationSrvImpl) RelationFollowerList(ctx context.Context, req *relatio
 	}
 
 	if req.UserId == 0 {
-		req.UserId = user_id
+		return nil, kerrors.NewBizStatusError(40002, "Invalid To_UserId")
 	}
-	if req.UserId == 0 && user_id == 0 {
-		return nil, kerrors.NewBizStatusError(40004, "Invalid Action Type")
-	}
+	//if req.UserId == 0 && user_id == 0 {
+	//	return nil, kerrors.NewBizStatusError(40004, "Invalid Action Type")
+	//}
 
 	users, err := api.NewFollowerListOp(ctx).FollowerList(req, user_id)
 	if err != nil {
@@ -127,7 +127,36 @@ func (s *RelationSrvImpl) RelationFollowerList(ctx context.Context, req *relatio
 }
 
 func (s *RelationSrvImpl) RelationFriendList(ctx context.Context, req *relation.DouyinRelationFriendListRequest) (resp *relation.DouyinRelationFriendListResponse, err error) {
-	// TODO: Your code here...
+	var (
+		respStatusMsg = "Get Friend List Successfully"
+	)
+
+	claim, err := xhttp.Jwt.ParseToken(req.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	friends, err := api.NewFollowerListOp(ctx).FriendList(claim.Id)
+
+	if err != nil {
+		return nil, err
+	}
+	//TODO CHAT
+	friendusers := make([]*relation.FriendUser, len(friends))
+	message := "hello"
+	for i, _ := range friendusers {
+		friendusers[i] = new(relation.FriendUser)
+		friendusers[i].Freiend = friends[i]
+		friendusers[i].Message = &message
+		friendusers[i].MsgType = 1
+	}
+
+	resp = &relation.DouyinRelationFriendListResponse{
+		StatusCode: 0,
+		StatusMsg:  &respStatusMsg,
+		UserList:   friendusers,
+	}
+
 	return
 }
 

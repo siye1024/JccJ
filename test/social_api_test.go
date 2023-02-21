@@ -57,11 +57,12 @@ func TestRelation(t *testing.T) {
 	assert.True(t, containTestUserA, "Follower test user failed")
 }
 
+//
 //func TestChat(t *testing.T) {
 //	e := newExpect(t)
 //
-//	userIdA, tokenA := getTestUserToken(testUserA, e)
-//	userIdB, tokenB := getTestUserToken(testUserB, e)
+//	userIdA, tokenA := getTestUserToken(testUserF, e)
+//	userIdB, tokenB := getTestUserToken(testUserG, e)
 //
 //	messageResp := e.POST("/douyin/message/action/").
 //		WithQuery("token", tokenA).WithQuery("to_user_id", userIdB).WithQuery("action_type", 1).WithQuery("content", "Send to UserB").

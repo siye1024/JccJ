@@ -71,3 +71,11 @@ func RelationFollowerList(ctx context.Context, req *relation.DouyinRelationFollo
 	}
 	return resp, nil
 }
+
+func RelationFriendList(ctx context.Context, req *relation.DouyinRelationFriendListRequest) (resp *relation.DouyinRelationFriendListResponse, err error) {
+	resp, err = relationClient.RelationFriendList(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}

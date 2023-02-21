@@ -30,7 +30,7 @@ func initRouter(r *gin.Engine) {
 	apiRouter.POST("/relation/action/", xhttp.RelationAction)
 	apiRouter.GET("/relation/follow/list/", xhttp.FollowList)
 	apiRouter.GET("/relation/follower/list/", xhttp.FollowerList)
-	//apiRouter.GET("/relation/friend/list/", controller.FriendList)
+	apiRouter.GET("/relation/friend/list/", xhttp.FriendList)
 	//apiRouter.GET("/message/chat/", controller.MessageChat)
 	//apiRouter.POST("/message/action/", controller.MessageAction)
 

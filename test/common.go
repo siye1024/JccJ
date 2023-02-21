@@ -12,6 +12,8 @@ var testUserB = "douyinTestUserB"
 var testUserC = "douyinTestUserC"
 var testUserD = "douyinTestUserD"
 var testUserE = "douyinTestUserE"
+var testUserF = "douyinTestUserF"
+var testUserG = "douyinTestUserG"
 
 func newExpect(t *testing.T) *httpexpect.Expect {
 	return httpexpect.WithConfig(httpexpect.Config{

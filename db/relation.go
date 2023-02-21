@@ -128,3 +128,35 @@ func FollowerList(ctx context.Context, tid int64) ([]*Relation, error) {
 	}
 	return RelationList, nil
 }
+
+func FriendList(ctx context.Context, fid int64) ([]*User, error) {
+	var (
+		RelationList []*Relation
+		Friends      []*User
+	)
+	err := DB.WithContext(ctx).Where("user_id =? ", fid).Or("to_user_id = ? ", fid).Find(&RelationList).Error
+	if err != nil {
+		return nil, err
+	}
+
+	rec := make(map[int64]int)
+
+	for _, r := range RelationList {
+		var nowId int64
+		if r.UserID == fid {
+			nowId = r.ToUserID
+		} else {
+			nowId = r.UserID
+		}
+		rec[nowId] += 1
+		if rec[nowId] == 2 {
+			friend, err := GetUserByID(ctx, nowId)
+			if err != nil {
+				return nil, err
+			}
+			Friends = append(Friends, friend)
+		}
+	}
+	return Friends, err
+
+}
