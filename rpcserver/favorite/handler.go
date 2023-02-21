@@ -56,13 +56,19 @@ func (s *FavoriteSrvImpl) FavoriteAction(ctx context.Context, req *favorite.Douy
 func (s *FavoriteSrvImpl) FavoriteList(ctx context.Context, req *favorite.DouyinFavoriteListRequest) (resp *favorite.DouyinFavoriteListResponse, err error) {
 	var (
 		respMsg = "Get Favortie List Success"
+		user_id int64
 	)
-	claim, err := xhttp.Jwt.ParseToken(req.Token)
-	if err != nil {
-		return nil, err
+	if len(req.Token) == 0 {
+		user_id = 0
+	} else {
+		claim, err := xhttp.Jwt.ParseToken(req.Token)
+		if err != nil {
+			return nil, err
+		}
+		user_id = claim.Id
 	}
 
-	if req.UserId <= 0 || claim.Id <= 0 { // if user can only see his own fav list, need req.UserId != claim.Id
+	if req.UserId <= 0 || user_id < 0 { // if user can only see his own fav list, need req.UserId != claim.Id
 		err := kerrors.NewBizStatusError(70003, "Invalid Token or User ID")
 		return nil, err
 	}

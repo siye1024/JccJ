@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"errors"
-	"github.com/bytedance/gopkg/util/logger"
 	"github.com/cloudwego/kitex/pkg/kerrors"
 	"gorm.io/gorm"
 )
@@ -54,7 +53,18 @@ func Favorite(ctx context.Context, uid int64, vid int64) error {
 		if err := tx.WithContext(ctx).Model(&user).Association("FavoriteVideos").Append(video); err != nil {
 			return err
 		}
-		//2.改变 video 表中的 favorite count
+
+		// 2. change the video.Author's favorited_count
+		author := new(User)
+		if err := tx.WithContext(ctx).First(author, video.AuthorID).Error; err != nil {
+			return err
+		}
+		authorRes := tx.WithContext(ctx).Model(author).Update("favorited_count", gorm.Expr("favorited_count + ?", 1))
+		if authorRes.Error != nil {
+			return authorRes.Error
+		}
+
+		//3.改变 video 表中的 favorite count
 		res := tx.Model(video).Update("favorite_count", gorm.Expr("favorite_count + ?", 1))
 		if res.Error != nil {
 			return res.Error
@@ -98,7 +108,17 @@ func DisFavorite(ctx context.Context, uid int64, vid int64) error {
 			return err
 		}
 
-		//2.改变 video 表中的 favorite count
+		// 2. change the video.Author's favorited_count
+		author := new(User)
+		if err := tx.WithContext(ctx).First(author, video.AuthorID).Error; err != nil {
+			return err
+		}
+		authorRes := tx.WithContext(ctx).Model(author).Update("favorited_count", gorm.Expr("favorited_count - ?", 1))
+		if authorRes.Error != nil {
+			return authorRes.Error
+		}
+
+		//3.改变 video 表中的 favorite count
 		if video.FavoriteCount > 0 {
 			res := tx.Model(video).Update("favorite_count", gorm.Expr("favorite_count - ?", 1))
 			if res.Error != nil {
@@ -115,19 +135,19 @@ func DisFavorite(ctx context.Context, uid int64, vid int64) error {
 	if err != nil {
 		return err
 	}
-	//double check if likes are negative, if yes , roll back
-	video := new(Video)
-	if err := DB.WithContext(ctx).First(video, vid).Error; err != nil {
-		return err
-	}
-	if video.FavoriteCount < 0 {
-		//TODO: ADD RETRY Method
-		err = Favorite(ctx, uid, vid)
-		if err != nil {
-			logger.Errorf("video %d has negative favorite count, rollback error")
-		}
-		return kerrors.NewBizStatusError(70004, "Invalid Action")
-	}
+	////double check if likes are negative, if yes , roll back
+	//video := new(Video)
+	//if err := DB.WithContext(ctx).First(video, vid).Error; err != nil {
+	//	return err
+	//}
+	//if video.FavoriteCount < 0 {
+	//	//TODO: ADD RETRY Method
+	//	err = Favorite(ctx, uid, vid)
+	//	if err != nil {
+	//		logger.Errorf("video %d has negative favorite count, rollback error")
+	//	}
+	//	return kerrors.NewBizStatusError(70004, "Invalid Action")
+	//}
 
 	return nil
 }

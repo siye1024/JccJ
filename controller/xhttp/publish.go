@@ -113,7 +113,7 @@ func PublishList(c *gin.Context) {
 	paramVar.UserId = int64(user_id)
 	paramVar.Token = c.Query("token")
 
-	if len(paramVar.Token) == 0 || paramVar.UserId < 0 {
+	if paramVar.UserId <= 0 {
 		respStatusMsg = "Invalid Login User"
 		SendResponse(c, gin.H{
 			"status_code": 21001,
