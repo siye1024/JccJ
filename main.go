@@ -19,7 +19,10 @@ import (
 
 func main() {
 
-	var wg sync.WaitGroup
+	var (
+		wg sync.WaitGroup
+		ip = "localhost"
+	)
 	wg.Add(9)
 
 	go func() { // INIT HTTP
@@ -33,7 +36,7 @@ func main() {
 	go func() { // INIT DB & Minio Client
 		defer wg.Done()
 		db.InitDB()
-		xminio.InitMInio()
+		xminio.InitMInio(ip)
 	}()
 
 	go func() { // INIT User RPC server
