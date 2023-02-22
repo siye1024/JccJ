@@ -16,29 +16,31 @@ var (
 	SecretAccessKey = "doushengMinio"
 	UseSSL          = false
 	BucketName      = "doushengjccj"
-	//Location        = "chengdu"
 )
 
-func InitMInio() {
+func InitMInio(ip string) {
 
 	ctx := context.Background()
-	//only for test
-	ip, err := GetIPv4()
-	if err != nil {
-		log.Fatal("Minio Get IP Failed")
-		return
+	//only for localhost
+	if ip == "localhost" {
+		ip, err := GetIPv4()
+		if err != nil {
+			log.Fatal("Minio Get IP Failed")
+			return
+		}
+		log.Println(ip)
 	}
 
 	//ip := "47.93.27.219"
-	log.Println(ip)
 	Endpoint = ip + Endpoint
+	log.Println(Endpoint)
 
 	client, err := minio.New(Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(AccessKeyID, SecretAccessKey, ""),
 		Secure: UseSSL,
 	})
 	if err != nil {
-		log.Fatalln("minio client init failed: %v", err)
+		log.Fatalln("minio client init failed:", err)
 	}
 
 	log.Println("minio client init successfully")
@@ -48,12 +50,12 @@ func InitMInio() {
 	if err != nil {
 		exists, errBucketExists := minioClient.BucketExists(ctx, BucketName)
 		if errBucketExists == nil && exists {
-			log.Println("bucket %s already exists", BucketName)
+			log.Println(BucketName, " already exists")
 		} else {
-			log.Fatalln("minio client init failed: %v", err)
+			log.Fatalln("minio client init failed: ", err)
 		}
 	} else {
-		log.Println("bucket %s create successfully", BucketName)
+		log.Println(BucketName, "has been created successfully")
 	}
 }
 
