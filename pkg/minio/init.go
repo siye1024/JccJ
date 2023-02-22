@@ -21,9 +21,10 @@ var (
 func InitMInio(ip string) {
 
 	ctx := context.Background()
+	var err error
 	//only for localhost
 	if ip == "localhost" {
-		ip, err := GetIPv4()
+		ip, err = GetIPv4()
 		if err != nil {
 			log.Fatal("Minio Get IP Failed")
 			return
