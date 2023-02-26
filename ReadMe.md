@@ -3,6 +3,18 @@
 - 项目简介：主要基于Kitex RPC+ Gin HTTP + MySQL实现的第五届字节跳动青训营极简抖音后端微服务项目 ——抖声
 - Github地址：https://github.com/siye1024/JccJ/
 
+直接依赖，需提前安装：
+- Go 1.19.5
+- Kitex v0.4.4
+- libprotoc 3.21.12
+- ffmpeg 5.1
+- Docker 23.0.1
+
+启动流程：
+1. 在`./pkg/minio/init`中配置Minio参数 (注：ip填0则自动获取本机内网ip，公网ip请手动配置)
+2. 启动docker  `docker compose up -d` 
+3. 运行服务 `go build && ./dousheng` (注：仅为方便单机测试的启动方式，采用多协程，sync.WaitGroup管理)
+
 ## 二、项目实现
 ### 1. 技术选型分析
 - **微服务架构vs单体架构**：
@@ -43,24 +55,13 @@
 
 ### 2. 架构设计
 #### 2.1 系统架构设计
-![框架架构](https://user-images.githubusercontent.com/52773233/220381271-269ce674-684d-4a40-8fbe-e094e79e4dda.jpg)
+![框架架构](https://bytedancecampus1.feishu.cn/docx/TydhdK2LcoyW2Jxy47bcfjISnQy#PGoed8s0uo2i4qxeGjAc95LInIe)
 
 #### 2.2 关系型数据库设计
 参考[https://github.com/siye1024/JccJ/tree/master/pic](https://github.com/siye1024/JccJ/tree/master/pic)
 
 ### 3. 项目代码介绍
 
-直接依赖，需提前安装：
-- Go 1.19.5
-- Kitex v0.4.4
-- libprotoc 3.21.12
-- ffmpeg 5.1
-- Docker 23.0.1
-
-操作流程：
-1. 在`./pkg/minio/init`中配置Minio参数 (注：ip填0则自动获取本机内网ip，公网ip请手动配置)
-2. 启动docker  `docker compose up -d` 
-3. 运行服务 `go build && ./dousheng` (注：仅为方便单机测试的启动方式，采用多协程，sync.WaitGroup管理)
 
 ```
 ├── config                     //目前只有nginx配置,计划完善配置管理
@@ -84,37 +85,10 @@
 ├── main.go                    //启动服务
 ├── router.go                  //路由
 ```
-## 三、测试结果
-### 1. 功能测试
+## 三、测试结果、演示视频、总结与反思
 
-### 2. 性能测试
+参见：![汇报文档](https://bytedancecampus1.feishu.cn/docx/TydhdK2LcoyW2Jxy47bcfjISnQy)
 
-## 四、Demo演示视频
 
-## 五、项目总结与反思
-### 1.目前仍存在的问题
-a. 视频发布耗时待优化
-  
-  视频体积较大时，发布视频的耗时较长
 
-b. 视频点赞操作待优化
-  
-  用户进行视频点赞或取消点赞操作时，会先从用户喜爱的视频列表中查看用户是否点赞过该视频，在根据是否点赞过该视频的状态，判断用户后续点赞或取消点赞的合法性
-
-### 2.已识别出的优化项
-a. 视频点赞优化操作
-  
-  维护一个UserID-VideoID表格，表格中存储的内容为用户的UserID及用户点赞过的视频的VideoID，并对该表建立索引，以此提高查询速度
-
-### 3. 架构演进的可能性
-
-### 4. 项目过程中的反思与总结
-a. 理解**Gorm的蛇形复数约定**含义
-  
-  此处踩坑，Gorm默认情况下使用结构体名的**蛇形复数**作为表名，字段名的**蛇形**作为列名，因此**数据库设计时，最好表名都采用复数形式**，不然可能导致对数据库的操作失败。
-
-b. 善用github的分支
-  
-  使用github进行代码管理时，其他成员可以使用**fork**操作进行自己的开发，当对于仓库所有者，无法**fork**自己的仓库，此时应该创建分支，在分支上进行项目的开发，问就是管理规范，踩坑教训。
-  
 
