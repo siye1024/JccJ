@@ -11,9 +11,9 @@
 - Docker 23.0.1
 
 启动流程：
-1. 在`./pkg/minio/init`中配置Minio参数 (注：ip填0则自动获取本机内网ip，公网ip请手动配置)
-2. 启动docker  `docker compose up -d` 
-3. 运行服务 `go build && ./dousheng` (注：仅为方便单机测试的启动方式，采用多协程，sync.WaitGroup管理)
+1. 在`./main.go`中配置服务ip，默认为"localhost" (注：公网ip请手动配置，否则自动获取内网ip)。如需配置Minio参数，请前往`./pkg/minio/init`
+2. 启动`docker  docker compose up -d` 
+3. 运行服务` go build && ./dousheng` (注：仅为方便单机测试的启动方式，采用多协程，sync.WaitGroup管理)
 
 ## 二、项目实现
 ### 1. 技术选型分析
@@ -55,7 +55,7 @@
 
 ### 2. 架构设计
 #### 2.1 系统架构设计
-![框架架构](https://bytedancecampus1.feishu.cn/docx/TydhdK2LcoyW2Jxy47bcfjISnQy#PGoed8s0uo2i4qxeGjAc95LInIe)
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ed3c92e5e416457dac1edeb28ba82a3a~tplv-k3u1fbpfcp-watermark.image?)
 
 #### 2.2 关系型数据库设计
 参考[https://github.com/siye1024/JccJ/tree/master/pic](https://github.com/siye1024/JccJ/tree/master/pic)
@@ -87,7 +87,7 @@
 ```
 ## 三、测试结果、演示视频、总结与反思
 
-参见：![汇报文档](https://bytedancecampus1.feishu.cn/docx/TydhdK2LcoyW2Jxy47bcfjISnQy)
+参见：https://bytedancecampus1.feishu.cn/docx/TydhdK2LcoyW2Jxy47bcfjISnQy
 
 
 
