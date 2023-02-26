@@ -58,7 +58,7 @@
 ![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ed3c92e5e416457dac1edeb28ba82a3a~tplv-k3u1fbpfcp-watermark.image?)
 
 #### 2.2 关系型数据库设计
-参考[https://github.com/siye1024/JccJ/tree/master/pic](https://github.com/siye1024/JccJ/tree/master/pic)
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/cd164ec0da9d4f9fba82e41a98609a0c~tplv-k3u1fbpfcp-watermark.image?)
 
 ### 3. 项目代码介绍
 
